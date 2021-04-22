@@ -1,1 +1,4 @@
+#include "resource.h"
+
 AAAA ICON "ico.ico"
+NOTO_SANS_JP_F RCDATA "NotoSansJP-Regular.otf" 
