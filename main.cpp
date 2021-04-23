@@ -1,4 +1,3 @@
-
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_win32.h>
@@ -14,7 +13,7 @@ ContextGl *context;
 
 bool show_demo_window = true;
 bool show_another_window = false;
-ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.20f);
+ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 void Draw()
 {
 	// Start the Dear ImGui frame
@@ -67,8 +66,6 @@ void Draw()
 	glClear(GL_COLOR_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-
- 
 	SwapBuffers(context->dc);
 }
 
@@ -85,11 +82,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		0L, 0L,
 		hInstance,
 		NULL, NULL, NULL, NULL,
-		L"ImGui Example", NULL 
+		L"Main window", NULL 
 	};
 
 	::RegisterClassEx(&wc);
-	HWND hwnd = ::CreateWindow(wc.lpszClassName, L"Dear ImGui Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+	HWND hwnd = ::CreateWindow(wc.lpszClassName, L"HA6GUI: 判定ちゃん６", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
 	::ShowWindow(hwnd, nCmdShow);
 	::UpdateWindow(hwnd);
@@ -108,24 +105,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	//Load japanese fonts
 	char winFolder[512]{};
+	ImFontConfig config;
 	int appendAt = GetWindowsDirectoryA(winFolder, 512);
 	strcpy(winFolder+appendAt, "\\Fonts\\meiryo.ttc");
-	if(!io.Fonts->AddFontFromFileTTF(winFolder, 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese()))
+	if(!io.Fonts->AddFontFromFileTTF(winFolder, 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()))
 	{
 		auto res = FindResource(hInstance, MAKEINTRESOURCE(NOTO_SANS_JP_F), RT_RCDATA);
 		void *notoFont = LockResource(LoadResource(nullptr, res));
-		ImFontConfig config;
 		config.FontDataOwnedByAtlas = false;
+		
 		io.Fonts->AddFontFromMemoryTTF(notoFont, SizeofResource(nullptr, res), 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
 	}
 
-	bool done = false;
-
-		// Poll and handle messages (inputs, window resize, etc.)
-		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-		// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-		// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-		// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
@@ -133,13 +124,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		::DispatchMessage(&msg);
 		if (msg.message == WM_QUIT)
 		{
-			done = true;
 			break;
 		}
 		Draw();
 	}
-
-
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -148,7 +136,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	delete context;
 	::DestroyWindow(hwnd);
 	::UnregisterClass(wc.lpszClassName, wc.hInstance);
-
 	return 0;
 }
 
