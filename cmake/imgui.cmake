@@ -4,6 +4,8 @@ if(NOT EXISTS "${imgui_PATH}/imgui.h")
 	message(FATAL_ERROR "Imgui not found. Did you forget to init the submodules?")
 endif()
 
+message(STATUS $<$<CONFIG:Release>:Release> build)
+
 file(GLOB imgui_CPP
 	"${imgui_PATH}/*.cpp"
 )
@@ -17,7 +19,9 @@ add_library(imgui
 target_include_directories(imgui PUBLIC
 	"${imgui_PATH}"
 	"${imgui_PATH}/backends"
+	config
 )
 
-target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD IMGUI_IMPL_OPENGL_ES2)
+
+target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD IMGUI_IMPL_OPENGL_ES2 IMGUI_USER_CONFIG=<config.h> )
 target_link_libraries(imgui PUBLIC glad)

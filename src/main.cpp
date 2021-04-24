@@ -11,9 +11,27 @@
 
 #include <res/resource.h>
 
+ImVec2 clientRect;
+
 static HWND mainWindowHandle;
 static ContextGl *context;
-ImVec2 clientRect;
+
+void LoadJapaneseFonts(ImGuiIO& io)
+{
+	char winFolder[512]{};
+	ImFontConfig config;
+	int appendAt = GetWindowsDirectoryA(winFolder, 512);
+	strcpy(winFolder+appendAt, "\\Fonts\\meiryo.ttc");
+
+	if(!io.Fonts->AddFontFromFileTTF(winFolder, 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()))
+	{
+		auto res = FindResource((HMODULE)GetWindowLongPtr(mainWindowHandle, GWLP_HINSTANCE), MAKEINTRESOURCE(NOTO_SANS_JP_F), RT_RCDATA);
+		void *notoFont = LockResource(LoadResource(nullptr, res));
+		config.FontDataOwnedByAtlas = false;
+		
+		io.Fonts->AddFontFromMemoryTTF(notoFont, SizeofResource(nullptr, res), 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
+	}
+}
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
@@ -42,32 +60,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.IniFilename = nullptr;
-
+	LoadJapaneseFonts(io);
 
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	ImGui::StyleColorsLight();
 
-	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplOpenGL3_Init("#version 120");
 
-	//Load japanese fonts
-	char winFolder[512]{};
-	ImFontConfig config;
-	int appendAt = GetWindowsDirectoryA(winFolder, 512);
-	strcpy(winFolder+appendAt, "\\Fonts\\meiryo.ttc");
-	if(!io.Fonts->AddFontFromFileTTF(winFolder, 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()))
-	{
-		auto res = FindResource(hInstance, MAKEINTRESOURCE(NOTO_SANS_JP_F), RT_RCDATA);
-		void *notoFont = LockResource(LoadResource(nullptr, res));
-		config.FontDataOwnedByAtlas = false;
-		
-		io.Fonts->AddFontFromMemoryTTF(notoFont, SizeofResource(nullptr, res), 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
-	}
-
 	MainFrame frame(context);
-
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
@@ -92,8 +94,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-// Win32 message handler
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
