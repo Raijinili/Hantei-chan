@@ -1,6 +1,6 @@
 #include "main.h"
 #include "context_gl.h"
-#include "mainframe.h"
+#include "main_frame.h"
 
 #include <cstring>
 #include <imgui.h>

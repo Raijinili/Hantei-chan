@@ -12,7 +12,8 @@ include(imgui)
 
 add_executable(${EXE} WIN32
 	src/main.cpp
-	src/mainframe.cpp
+	src/main_frame.cpp
+	src/main_pane.cpp
 	res/res.rc
 
 )

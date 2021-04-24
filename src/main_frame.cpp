@@ -1,4 +1,5 @@
-#include "mainframe.h"
+#include "main_frame.h"
+
 #include "main.h"
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -7,17 +8,13 @@
 #include <windows.h>
 #include <glad/glad.h>
 
-
 bool show_demo_window = true;
-bool show_another_window = false;
-bool my_tool_active = true;
-
 
 MainFrame::MainFrame(ContextGl *context_):
-context(context_),
-clearColor{0.45f, 0.55f, 0.60f}
+context(context_)
 {
 	glViewport(0, 0, clientRect.x, clientRect.y);
+	WarmStyle();
 }
 
 void MainFrame::Draw()
@@ -35,51 +32,68 @@ void MainFrame::DrawBack()
 
 void MainFrame::DrawUi()
 {
-	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-	{
-		static float f = 0.0f;
-		static int counter = 0;
-		static bool firstCall = true;
-
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->WorkPos);
-		ImGui::SetNextWindowSize(viewport->WorkSize);
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		//ImGui::SetNextWindowSize(clientRect);
-		//ImGui::SetNextWindowPos(ImVec2{});
-
-		ImGui::Begin("Die", nullptr,
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_MenuBar |
-			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_NoBackground 
-		);
+	//Fullscreen docker to provide the layout for the panes
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("Dock Window", nullptr,
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_MenuBar |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus |
+		ImGuiWindowFlags_NoDocking |
+		ImGuiWindowFlags_NoBackground 
+	);
 		ImGui::PopStyleVar(3);
 		if (ImGui::BeginMenuBar())
 		{
+			//ImGui::Separator();
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("Exit")) PostQuitMessage(0);
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("Preferences"))
+			{
+				if (ImGui::BeginMenu("Switch preset style"))
+				{		
+					if (ImGui::Combo("Style", &style_idx, "Warm\0Dark\0Light\0Classic\0"))
+					{
+						switch (style_idx)
+						{
+						case 0: WarmStyle(); break;
+						case 1: ImGui::StyleColorsDark(); ChangeClearColor(0.202f, 0.243f, 0.293f); break;
+						case 2: ImGui::StyleColorsLight(); ChangeClearColor(0.634f, 0.668f, 0.687f); break;
+						case 3: ImGui::StyleColorsClassic(); ChangeClearColor(0.142f, 0.075f, 0.147f); break;
+						}
+					}
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Background color"))
+				{
+					ImGui::ColorEdit3("##clearColor", (float*)&clearColor, ImGuiColorEditFlags_NoInputs);
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenuBar();
 		}
+
+		//	ImGui::ColorEdit3("clear color", (float*)&clearColor); // Edit 3 floats representing a color
+
 		
-		ImGuiID dockspaceID = ImGui::GetID("MyDockSpace");
+		ImGuiID dockspaceID = ImGui::GetID("Dock Space");
 		if (!ImGui::DockBuilderGetNode(dockspaceID)) {
 			ImGui::DockBuilderRemoveNode(dockspaceID);
 			ImGui::DockBuilderAddNode(dockspaceID, ImGuiDockNodeFlags_DockSpace);
@@ -89,8 +103,8 @@ void MainFrame::DrawUi()
 			ImGuiID dock_left_id = ImGui::DockBuilderSplitNode(toSplit, ImGuiDir_Left, 0.35f, nullptr, &toSplit);
 			ImGuiID dock_down_id = ImGui::DockBuilderSplitNode(toSplit, ImGuiDir_Down, 0.45f, nullptr, &toSplit);
 
-			ImGui::DockBuilderDockWindow("Info", dock_left_id);
- 			ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_down_id);
+			ImGui::DockBuilderDockWindow("Left Pane", dock_left_id);
+ 			ImGui::DockBuilderDockWindow("Bottom Pane", dock_down_id);
 
 			ImGui::DockBuilderFinish(dockspaceID);
 		}
@@ -100,42 +114,13 @@ void MainFrame::DrawUi()
 			ImGuiDockNodeFlags_AutoHideTabBar |
 			ImGuiDockNodeFlags_NoSplit
 		); 
-		ImGui::End(); 
+	ImGui::End();
 
-		ImGui::Begin("Info",0 , ImGuiWindowFlags_NoMove );
-
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clearColor); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-		ImGui::End();
-		
-		
-	}
-		if (show_demo_window)
-		ImGui::ShowDemoWindow(&show_demo_window);
+	mainPane.Draw(); 
 
 
-	// 3. Show another simple window.
-	if (show_another_window)
-	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
-		ImGui::End();
-	}
-
+	if (show_demo_window)
+	ImGui::ShowDemoWindow(&show_demo_window);
 	// Rendering
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -199,7 +184,12 @@ void MainFrame::WarmStyle()
 	colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(0.70f, 0.70f, 0.70f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
-	clearColor[0] = 0.695f;
-	clearColor[1] = 0.757f;
-	clearColor[2] = 0.608f;
+	ChangeClearColor(0.695f, 0.757f, 0.608f);
+}
+
+void MainFrame::ChangeClearColor(float r, float g, float b)
+{
+	clearColor[0] = r;
+	clearColor[1] = g;
+	clearColor[2] = b;
 }

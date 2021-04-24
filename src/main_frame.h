@@ -1,6 +1,7 @@
 #ifndef MAINFRAME_H_GUARD
 #define MAINFRAME_H_GUARD
 #include "context_gl.h"
+#include "main_pane.h"
 
 class MainFrame
 {
@@ -13,10 +14,14 @@ public:
 private:
 	ContextGl *context;
 	float clearColor[3];
+	int style_idx = 0;
 
 	void DrawBack();
 	void DrawUi();
 	void WarmStyle();
+	void ChangeClearColor(float r, float g, float b);
+
+	MainPane mainPane;
 	
 };
 
