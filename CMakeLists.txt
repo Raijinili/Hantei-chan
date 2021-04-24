@@ -11,8 +11,10 @@ include(glad)
 include(imgui)
 
 add_executable(${EXE} WIN32
-	main.cpp
+	src/main.cpp
+	src/mainframe.cpp
 	res/res.rc
+
 )
 
 target_include_directories(${EXE} PRIVATE ".")

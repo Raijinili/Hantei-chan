@@ -2,5 +2,6 @@
 .cache
 /win64
 /compat
+/test
 *.ini
 *.exe
