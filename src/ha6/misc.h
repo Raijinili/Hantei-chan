@@ -1,6 +1,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include <string>
+
 static inline int to_pow2(int a) {
 	int v = 1;
 	while (v < a) {
@@ -11,6 +13,8 @@ static inline int to_pow2(int a) {
 };
 
 bool ReadInMem(const char *filename, char *&data, unsigned int &size);
+
+std::string sj2utf8(const std::string &input);
 
 
 #endif

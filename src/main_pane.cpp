@@ -1,9 +1,47 @@
 #include "main_pane.h"
 #include <imgui.h>	
 
+MainPane::MainPane():
+frameData(nullptr),
+currentPattern(-1)
+{
+	
+} 
+
+void MainPane::SetFrameData(FrameData *frameData_)
+{
+	if(frameData_)
+		currentPattern = 0;
+	else
+		currentPattern = -1;
+
+	frameData = frameData_;
+}
+
+
 void MainPane::Draw()
 {	
+
 	ImGui::Begin("Left Pane",0 , ImGuiWindowFlags_NoMove );
+	if(frameData)
+	{
+		if (ImGui::BeginCombo("Pattern", frameData->GetName(currentPattern).c_str(), ImGuiComboFlags_HeightLargest))
+		{
+			auto count = frameData->get_sequence_count();
+			for (int n = 0; n < count; n++)
+			{
+				const bool is_selected = (currentPattern == n);
+				if (ImGui::Selectable(frameData->GetName(n).c_str(), is_selected))
+					currentPattern = n;
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+	}
+
 
 	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 	ImGui::Checkbox("Another Window", &show_another_window);

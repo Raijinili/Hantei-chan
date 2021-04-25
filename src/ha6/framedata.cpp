@@ -5,6 +5,7 @@
 #include "framedata.h"
 #include "misc.h"
 #include <cstring>
+#include <cassert>
 
 struct TempInfo {
 	Sequence	*seq;
@@ -454,6 +455,7 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				str[len] = '\0';
 				
 				seq->name = str;
+				seq->name = sj2utf8(seq->name);
 			}
 			
 			data += 1 + ((len+3)/4);
@@ -532,6 +534,7 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				
 				seq->subframe_count = 0;
 				
+				seq->name += " *";
 				seq->initialized = 1;
 				initialized = 1;
 			}
@@ -718,11 +721,28 @@ Sequence *FrameData::get_sequence(int n) {
 	
 	Sequence *seq = m_sequences[n];
 	if (seq && !seq->initialized) {
+		assert(seq->initialized);
 		return 0;
 	}
 	
 	return seq;
 }
+
+
+const std::string& FrameData::GetName(int n)
+{
+	static const std::string invalid = "NULL";
+	static const std::string empty = "";
+	if (!m_loaded || n < 0 || (unsigned int)n >= m_nsequences) {
+		return invalid;
+	}
+
+	if(m_sequences[n])
+		return m_sequences[n]->name;
+
+	return empty;
+}
+
 
 FrameData::FrameData() {
 	m_sequences = 0;

@@ -1,7 +1,6 @@
 #include "main.h"
 #include "context_gl.h"
 #include "main_frame.h"
-#include <ha6/framedata.h>
 
 #include <cstring>
 #include <imgui.h>
@@ -21,16 +20,19 @@ void LoadJapaneseFonts(ImGuiIO& io)
 {
 	char winFolder[512]{};
 	ImFontConfig config;
+/* 	config.PixelSnapH = 1;
+	config.OversampleH = 1;
+	config.OversampleV = 1; */
 	int appendAt = GetWindowsDirectoryA(winFolder, 512);
-	strcpy(winFolder+appendAt, "\\Fonts\\meiryo.ttc");
+	strcpy(winFolder+appendAt, "\\Fonts\\meeiryo.ttc");
 
-	if(!io.Fonts->AddFontFromFileTTF(winFolder, 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()))
+	if(!io.Fonts->AddFontFromFileTTF(winFolder, 20.0f, &config, io.Fonts->GetGlyphRangesJapanese()))
 	{
 		auto res = FindResource((HMODULE)GetWindowLongPtr(mainWindowHandle, GWLP_HINSTANCE), MAKEINTRESOURCE(NOTO_SANS_JP_F), RT_RCDATA);
 		void *notoFont = LockResource(LoadResource(nullptr, res));
 		config.FontDataOwnedByAtlas = false;
 		
-		io.Fonts->AddFontFromMemoryTTF(notoFont, SizeofResource(nullptr, res), 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
+		io.Fonts->AddFontFromMemoryTTF(notoFont, SizeofResource(nullptr, res), 20.0f, &config, io.Fonts->GetGlyphRangesJapanese());
 	}
 }
 
@@ -55,8 +57,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	::ShowWindow(hwnd, nCmdShow);
 	::UpdateWindow(hwnd);
 
-	FrameData fd;
-	fd.load("test/akaakiha.HA6");
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -68,6 +68,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	
 	ImGui::StyleColorsLight();
 
 	ImGui_ImplWin32_Init(hwnd);

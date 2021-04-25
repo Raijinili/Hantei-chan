@@ -15,6 +15,9 @@ context(context_)
 {
 	glViewport(0, 0, clientRect.x, clientRect.y);
 	WarmStyle();
+
+	framedata.load("test/akaakiha.HA6");
+	mainPane.SetFrameData(&framedata);
 }
 
 void MainFrame::Draw()
@@ -68,7 +71,7 @@ void MainFrame::DrawUi()
 			{
 				if (ImGui::BeginMenu("Switch preset style"))
 				{		
-					if (ImGui::Combo("Style", &style_idx, "Warm\0Dark\0Light\0Classic\0"))
+					if (ImGui::Combo("Style", &style_idx, "Warm\0Dark\0Light\0ImGui\0"))
 					{
 						switch (style_idx)
 						{

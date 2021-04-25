@@ -125,21 +125,23 @@ struct Sequence {
 
 class FrameData {
 private:
-	Sequence	**m_sequences;
 	unsigned int	m_nsequences;
 
 	bool		m_loaded;
 public:
+
+	Sequence	**m_sequences;
 	bool		load(const char *filename);
 
 	//Probably unnecessary.
 	//bool load_move_list(Pack *pack, const char *filename);
 
-	int		get_sequence_count();
+	int get_sequence_count();
 
-	Sequence	*get_sequence(int n);
+	Sequence *get_sequence(int n);
+	const std::string& GetName(int n);
 
-	void		free();
+	void free();
 
 		FrameData();
 		~FrameData();
