@@ -89,9 +89,6 @@ void MainFrame::DrawUi()
 			}
 			ImGui::EndMenuBar();
 		}
-
-		//	ImGui::ColorEdit3("clear color", (float*)&clearColor); // Edit 3 floats representing a color
-
 		
 		ImGuiID dockspaceID = ImGui::GetID("Dock Space");
 		if (!ImGui::DockBuilderGetNode(dockspaceID)) {
@@ -120,7 +117,8 @@ void MainFrame::DrawUi()
 
 
 	if (show_demo_window)
-	ImGui::ShowDemoWindow(&show_demo_window);
+		ImGui::ShowDemoWindow(&show_demo_window);
+
 	// Rendering
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

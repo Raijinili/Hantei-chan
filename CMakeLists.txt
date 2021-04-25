@@ -14,11 +14,14 @@ add_executable(${EXE} WIN32
 	src/main.cpp
 	src/main_frame.cpp
 	src/main_pane.cpp
-	res/res.rc
 
+	src/ha6/framedata.cpp
+	src/ha6/misc.cpp
+	
+	res/res.rc
 )
 
-target_include_directories(${EXE} PRIVATE ".")
+target_include_directories(${EXE} PRIVATE "." "src")
 target_compile_definitions(${EXE} PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN)
 
 find_package(OpenGL REQUIRED)

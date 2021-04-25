@@ -1,6 +1,7 @@
 #include "main.h"
 #include "context_gl.h"
 #include "main_frame.h"
+#include <ha6/framedata.h>
 
 #include <cstring>
 #include <imgui.h>
@@ -53,6 +54,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	mainWindowHandle = hwnd;
 	::ShowWindow(hwnd, nCmdShow);
 	::UpdateWindow(hwnd);
+
+	FrameData fd;
+	fd.load("test/akaakiha.HA6");
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
