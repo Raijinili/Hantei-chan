@@ -9,7 +9,6 @@ class Render
 private:
 	Vao vao;
 	int lProjection;
-	int lAttribIndexSimple[2];
 	Shader sSimple;
 	Shader sTextured;
 

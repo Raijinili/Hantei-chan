@@ -13,18 +13,18 @@
 Render::Render():
 vao(Vao::F2F3, GL_STATIC_DRAW)
 {
+	sSimple.BindAttrib("Position", 0);
+	sSimple.BindAttrib("Color", 1);
 	sSimple.LoadShader("src/simple.vert", "src/simple.frag");
 	sSimple.Use();
 	
 	lProjection = sSimple.GetLoc("ProjMtx");
-	sSimple.BindAttrib("Position", 0);
-	sSimple.BindAttrib("Color", 1);
-	lAttribIndexSimple[1] = sSimple.GetAttribLoc("ProjMtx");
 	
+
 	float stageVertices[] = {
-		0, 0, 	1, 1, 0,
-		2000, 0,  	0, 1, 1,
-		2000, 2000,  	1, 0, 1,
+		200, 200, 	1, 1, 0,
+		500, 200,  	0, 1, 1,
+		500, 0,  	1, 0, 1,
 	};
 
 	vao.Prepare(sizeof(stageVertices), stageVertices);

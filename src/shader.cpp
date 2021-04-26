@@ -58,7 +58,11 @@ GLuint CreateShader(const char **src, GLenum type)
 }
 
 Shader::Shader(): program(0)
-{}
+{
+	program = glCreateProgram();
+	if (program == 0)
+		MessageBoxA(nullptr, "Shader program creation failed", "Shader program", MB_ICONSTOP);
+}
 Shader::~Shader()
 {
 	glDeleteProgram(program);
@@ -101,10 +105,6 @@ void Shader::LoadShader(const char *vertex_path, const char *fragment_path)
 	GLuint myFragShader = CreateShader(&fragShaderSrc, GL_FRAGMENT_SHADER);
 
 	std::stringstream ss;
-
-	program = glCreateProgram();
-	if (program == 0)
-		ss << "Shader program creation failed\n";
 
 	glAttachShader(program, myVertexShader);
 	glAttachShader(program, myFragShader);
