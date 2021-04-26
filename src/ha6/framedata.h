@@ -139,7 +139,7 @@ public:
 	int get_sequence_count();
 
 	Sequence *get_sequence(int n);
-	const std::string& GetName(int n);
+	std::string GetDecoratedName(int n);
 
 	void free();
 

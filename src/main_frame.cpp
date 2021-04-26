@@ -13,7 +13,7 @@ bool show_demo_window = true;
 MainFrame::MainFrame(ContextGl *context_):
 context(context_)
 {
-	glViewport(0, 0, clientRect.x, clientRect.y);
+	
 	WarmStyle();
 
 	framedata.load("test/akaakiha.HA6");
@@ -24,6 +24,8 @@ void MainFrame::Draw()
 {
 	DrawBack();
 	DrawUi();
+	
+
 	SwapBuffers(context->dc);
 }
 
@@ -31,6 +33,7 @@ void MainFrame::DrawBack()
 {
 	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
 	glClear(GL_COLOR_BUFFER_BIT); 
+	render.Draw();
 }
 
 void MainFrame::DrawUi()
@@ -124,12 +127,15 @@ void MainFrame::DrawUi()
 
 	// Rendering
 	ImGui::Render();
+	
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 }
 
 void MainFrame::WarmStyle()
 {
 	ImVec4* colors = ImGui::GetStyle().Colors;
+
 	colors[ImGuiCol_Text]                   = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled]           = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
 	colors[ImGuiCol_WindowBg]               = ImVec4(0.95f, 0.91f, 0.85f, 1.00f);
@@ -165,7 +171,7 @@ void MainFrame::WarmStyle()
 	colors[ImGuiCol_ResizeGripActive]       = ImVec4(1.00f, 0.61f, 0.23f, 1.00f);
 	colors[ImGuiCol_Tab]                    = ImVec4(0.79f, 0.74f, 0.64f, 0.00f);
 	colors[ImGuiCol_TabHovered]             = ImVec4(1.00f, 0.64f, 0.06f, 0.85f);
-	colors[ImGuiCol_TabActive]              = ImVec4(0.51f, 0.48f, 0.38f, 0.42f);
+	colors[ImGuiCol_TabActive]              = ImVec4(0.69f, 0.40f, 0.12f, 0.31f);
 	colors[ImGuiCol_TabUnfocused]           = ImVec4(0.93f, 0.92f, 0.92f, 0.98f);
 	colors[ImGuiCol_TabUnfocusedActive]     = ImVec4(0.91f, 0.87f, 0.74f, 1.00f);
 	colors[ImGuiCol_DockingPreview]         = ImVec4(0.26f, 0.98f, 0.35f, 0.22f);
@@ -193,4 +199,10 @@ void MainFrame::ChangeClearColor(float r, float g, float b)
 	clearColor[0] = r;
 	clearColor[1] = g;
 	clearColor[2] = b;
+}
+
+void MainFrame::UpdateBackProj(glm::mat4 &&mat)
+{
+	render.UpdateProj(std::move(mat));
+	glViewport(0, 0, clientRect.x, clientRect.y);
 }

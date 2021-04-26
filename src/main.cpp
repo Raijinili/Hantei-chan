@@ -8,6 +8,7 @@
 #include <imgui_impl_win32.h>
 #include <windows.h>
 #include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <res/resource.h>
 
@@ -24,7 +25,7 @@ void LoadJapaneseFonts(ImGuiIO& io)
 	config.OversampleH = 1;
 	config.OversampleV = 1; */
 	int appendAt = GetWindowsDirectoryA(winFolder, 512);
-	strcpy(winFolder+appendAt, "\\Fonts\\meeiryo.ttc");
+	strcpy(winFolder+appendAt, "\\Fonts\\meiryo.ttc");
 
 	if(!io.Fonts->AddFontFromFileTTF(winFolder, 20.0f, &config, io.Fonts->GetGlyphRangesJapanese()))
 	{
@@ -56,6 +57,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	mainWindowHandle = hwnd;
 	::ShowWindow(hwnd, nCmdShow);
 	::UpdateWindow(hwnd);
+	
 
 
 	// Setup Dear ImGui context
@@ -75,6 +77,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	ImGui_ImplOpenGL3_Init("#version 120");
 
 	MainFrame frame(context);
+	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&frame);
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
@@ -115,6 +118,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				PostQuitMessage(1);
 				return 1;
 			}
+			return 0;
 		}
 	case WM_SIZE:
 		if (wParam != SIZE_MINIMIZED)
@@ -122,7 +126,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RECT rect;
 			GetClientRect(mainWindowHandle, &rect);
 			clientRect = ImVec2((float)rect.right, (float)rect.bottom);
-			glViewport(0, 0, clientRect.x, clientRect.y);
+			
+			MainFrame* mf = (MainFrame*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+			mf->UpdateBackProj(glm::ortho<float>(0, clientRect.x/2.f, clientRect.y/2.f, 0));
 		}
 		return 0;
 	case WM_SYSCOMMAND:

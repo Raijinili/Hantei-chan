@@ -6,6 +6,8 @@
 #include "misc.h"
 #include <cstring>
 #include <cassert>
+#include <sstream>
+#include <iomanip>
 
 struct TempInfo {
 	Sequence	*seq;
@@ -417,7 +419,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 }
 
 static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *data_end,
-				Sequence *seq) {
+				Sequence *seq, unsigned int seq_id) {
 	TempInfo temp_info;
 	bool initialized = 0;
 	unsigned int frame_no = 0;
@@ -503,6 +505,7 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				seq->nIF = data[4];
 				seq->nAT = data[5];
 				seq->nAS = data[7];
+
 				
 				int size;
 				size = sizeof(Frame) * seq->nframes;
@@ -533,8 +536,7 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				seq->IF = (Frame_IF *)(data + size);
 				
 				seq->subframe_count = 0;
-				
-				seq->name += " *";
+
 				seq->initialized = 1;
 				initialized = 1;
 			}
@@ -590,7 +592,7 @@ static unsigned int *fd_main_load(unsigned int *data, const unsigned int *data_e
 						seq->move_meter = 0;
 					}
 					
-					data = fd_sequence_load(data, data_end, seq);
+					data = fd_sequence_load(data, data_end, seq, seq_id);
 				}
 			} else {
 				++data;
@@ -728,21 +730,26 @@ Sequence *FrameData::get_sequence(int n) {
 	return seq;
 }
 
-
-const std::string& FrameData::GetName(int n)
+std::string FrameData::GetDecoratedName(int n)
 {
-	static const std::string invalid = "NULL";
-	static const std::string empty = "";
-	if (!m_loaded || n < 0 || (unsigned int)n >= m_nsequences) {
-		return invalid;
-	}
+		std::stringstream ss;
+		ss.flags(std::ios_base::right);
+		
+		if(m_sequences[n])
+		{
+			ss << std::setfill('0') << std::setw(3) << n << " " << m_sequences[n]->name;
+			if(m_sequences[n]->name.empty())
+					ss << "*";
+		}
+		else
+		{
 
-	if(m_sequences[n])
-		return m_sequences[n]->name;
-
-	return empty;
+			ss << std::setfill('0') << std::setw(3) << n;
+			
+		}
+			
+		return ss.str();
 }
-
 
 FrameData::FrameData() {
 	m_sequences = 0;

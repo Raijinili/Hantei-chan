@@ -1,9 +1,25 @@
 #include "main_pane.h"
 #include <imgui.h>	
 
+/* static void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+ */
+
 MainPane::MainPane():
 frameData(nullptr),
-currentPattern(-1)
+currentPattern(-1),
+currFrame(0),
+decoratedNames(nullptr)
 {
 	
 } 
@@ -16,23 +32,42 @@ void MainPane::SetFrameData(FrameData *frameData_)
 		currentPattern = -1;
 
 	frameData = frameData_;
+
+	delete[] decoratedNames;
+	
+	if(frameData)
+	{
+		decoratedNames = new std::string[frameData->get_sequence_count()];
+		int count = frameData->get_sequence_count();
+
+		for(int i = 0; i < count; i++)
+		{
+			decoratedNames[i] = frameData->GetDecoratedName(i);
+		}
+	}
+	else
+		decoratedNames = nullptr;
 }
 
 
 void MainPane::Draw()
 {	
-
+	
 	ImGui::Begin("Left Pane",0 , ImGuiWindowFlags_NoMove );
 	if(frameData)
 	{
-		if (ImGui::BeginCombo("Pattern", frameData->GetName(currentPattern).c_str(), ImGuiComboFlags_HeightLargest))
+		if (ImGui::BeginCombo("Pattern", decoratedNames[currentPattern].c_str(), ImGuiComboFlags_HeightLargest))
 		{
 			auto count = frameData->get_sequence_count();
 			for (int n = 0; n < count; n++)
 			{
+				//std::string &&name = std::to_string(n) + " " + frameData->GetName(n); 
 				const bool is_selected = (currentPattern == n);
-				if (ImGui::Selectable(frameData->GetName(n).c_str(), is_selected))
+				if (ImGui::Selectable(decoratedNames[n].c_str(), is_selected))
+				{
 					currentPattern = n;
+					currFrame = 0;
+				}
 
 				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 				if (is_selected)
@@ -40,29 +75,43 @@ void MainPane::Draw()
 			}
 			ImGui::EndCombo();
 		}
+
+		auto seq = frameData->get_sequence(currentPattern);
+		
+		if(seq)
+		{
+			auto nframes = seq->nframes - 1;
+			if(nframes >= 0)
+			{			
+				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+				ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - 160.f);
+				ImGui::SliderInt("##frameSlider", &currFrame, 0, nframes);
+				ImGui::SameLine();
+				ImGui::PushButtonRepeat(true);
+				if (ImGui::ArrowButton("##left", ImGuiDir_Left) && currFrame > 0) {currFrame--;}
+				ImGui::SameLine(0.0f, spacing);
+				if (ImGui::ArrowButton("##right", ImGuiDir_Right) && currFrame < nframes) {currFrame++;}
+				ImGui::PopButtonRepeat();
+				ImGui::SameLine();
+				ImGui::Text("%d/%d", currFrame+1, nframes+1);
+			}
+			else
+			{
+				ImGui::Text("This pattern has no frames.");
+			}
+		}
+		else
+		{
+			ImGui::Text("This pattern is empty.");
+		}
 	}
 
 
-	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	ImGui::Checkbox("Another Window", &show_another_window);
 
-	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-
-	if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-		counter++;
-	ImGui::SameLine();
-	ImGui::Text("counter = %d", counter);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 	ImGui::End();
 
-	if (show_another_window)
-	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
-		ImGui::End();
-	}
+
 }
