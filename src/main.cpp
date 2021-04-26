@@ -16,6 +16,8 @@ ImVec2 clientRect;
 
 static HWND mainWindowHandle;
 static ContextGl *context;
+static bool dragWindow;
+static POINT mousePos;
 
 void LoadJapaneseFonts(ImGuiIO& io)
 {
@@ -107,6 +109,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
 
+	MainFrame* mf = (MainFrame*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 	switch (msg)
 	{
 	case WM_CREATE:
@@ -126,11 +129,40 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RECT rect;
 			GetClientRect(mainWindowHandle, &rect);
 			clientRect = ImVec2((float)rect.right, (float)rect.bottom);
-			
-			MainFrame* mf = (MainFrame*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 			mf->UpdateBackProj(glm::ortho<float>(0, clientRect.x/2.f, clientRect.y/2.f, 0));
 		}
 		return 0;
+	case WM_LBUTTONDOWN:
+		if(!ImGui::GetIO().WantCaptureMouse)
+		{
+			dragWindow = true;
+			GetCursorPos(&mousePos);
+			ScreenToClient(hWnd, &mousePos);
+			SetCapture(hWnd);
+			
+			return 0;
+		}
+		break;
+	case WM_LBUTTONUP:
+		if(dragWindow)
+		{
+			ReleaseCapture();
+			dragWindow = false;
+			return 0;
+		}
+		break;
+	case WM_MOUSEMOVE:
+		if(dragWindow)
+		{
+			POINT newMousePos;
+			newMousePos.x = (short) LOWORD(lParam);
+			newMousePos.y = (short) HIWORD(lParam);
+
+			
+			mf->HandleMouseDrag(newMousePos.x-mousePos.x, newMousePos.y-mousePos.y);
+			mousePos = newMousePos;
+		}
+		break;
 	case WM_SYSCOMMAND:
 		if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
 			return 0;

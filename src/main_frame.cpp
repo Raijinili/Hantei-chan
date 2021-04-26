@@ -7,8 +7,10 @@
 #include <imgui_impl_win32.h>
 #include <windows.h>
 #include <glad/glad.h>
+#include <glm/vec3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-bool show_demo_window = true;
+bool show_demo_window = false;
 
 MainFrame::MainFrame(ContextGl *context_):
 context(context_)
@@ -32,7 +34,8 @@ void MainFrame::Draw()
 void MainFrame::DrawBack()
 {
 	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
-	glClear(GL_COLOR_BUFFER_BIT); 
+	glClear(GL_COLOR_BUFFER_BIT);
+	render.SetModelView(glm::translate(glm::mat4(1), glm::vec3(x>>1, y>>1, 0)));
 	render.Draw();
 }
 
@@ -93,6 +96,11 @@ void MainFrame::DrawUi()
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("About"))
+			{
+				if (ImGui::MenuItem("Show Demo Window")) show_demo_window = !show_demo_window;
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenuBar();
 		}
 		
@@ -119,6 +127,7 @@ void MainFrame::DrawUi()
 		); 
 	ImGui::End();
 
+	ImGui::Text("%d,%d",x,y);
 	mainPane.Draw(); 
 
 
@@ -205,4 +214,10 @@ void MainFrame::UpdateBackProj(glm::mat4 &&mat)
 {
 	render.UpdateProj(std::move(mat));
 	glViewport(0, 0, clientRect.x, clientRect.y);
+}
+
+void MainFrame::HandleMouseDrag(int x_, int y_)
+{
+	x += x_;
+	y += y_;
 }

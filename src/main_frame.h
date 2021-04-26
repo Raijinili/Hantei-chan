@@ -15,6 +15,8 @@ public:
 	
 	void Draw();
 	void UpdateBackProj(glm::mat4 &&mat);
+	void HandleMouseDrag(int x, int y);
+	
 
 private:
 	ContextGl *context;
@@ -27,6 +29,9 @@ private:
 	void DrawUi();
 	void WarmStyle();
 	void ChangeClearColor(float r, float g, float b);
+
+	int mDeltaX = 0, mDeltaY = 0;
+	int x=0, y=0;
 	
 
 	MainPane mainPane;

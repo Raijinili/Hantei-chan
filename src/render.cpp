@@ -6,9 +6,10 @@
 
 //Error
 #include <windows.h>
+#include <glad/glad.h>
 #include <sstream>
 
-#include <glad/glad.h>
+
 
 Render::Render():
 vao(Vao::F2F3, GL_STATIC_DRAW)
@@ -61,5 +62,4 @@ void Render::SetModelView(glm::mat4&& view)
 void Render::UpdateProj(glm::mat4&& view)
 {
 	projection = view;
-	glUniformMatrix4fv(lProjection, 1, GL_FALSE, glm::value_ptr(view));
 }
