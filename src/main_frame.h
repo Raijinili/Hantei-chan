@@ -4,6 +4,7 @@
 #include "render.h"
 #include "main_pane.h"
 #include <ha6/framedata.h>
+#include <ha6/cg.h>
 #include <glm/mat4x4.hpp>
 
 
@@ -23,6 +24,7 @@ private:
 	float clearColor[3];
 	int style_idx = 0;
 	FrameData framedata;
+	CG cg;
 
 
 	void DrawBack();

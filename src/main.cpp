@@ -129,7 +129,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RECT rect;
 			GetClientRect(mainWindowHandle, &rect);
 			clientRect = ImVec2((float)rect.right, (float)rect.bottom);
-			mf->UpdateBackProj(glm::ortho<float>(0, clientRect.x/2.f, clientRect.y/2.f, 0));
+
+			//TODO: TAke this out of here
+			mf->UpdateBackProj(glm::ortho<float>(0, clientRect.x, clientRect.y, 0));
 		}
 		return 0;
 	case WM_LBUTTONDOWN:

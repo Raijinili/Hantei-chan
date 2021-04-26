@@ -4,5 +4,7 @@ varying vec2 Frag_UV;
 
 void main()
 {
-    gl_FragColor = texture2D(Texture, Frag_UV.st);
+    vec4 col = texture2D(Texture, Frag_UV.st);
+    col.a = 1.f;
+    gl_FragColor = col;
 };

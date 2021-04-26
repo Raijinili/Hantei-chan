@@ -10,28 +10,36 @@
 #include <sstream>
 
 
-
 Render::Render():
-vao(Vao::F2F3, GL_STATIC_DRAW)
+cg(nullptr),
+vao(Vao::F2F2, GL_STATIC_DRAW)
 {
 	sSimple.BindAttrib("Position", 0);
 	sSimple.BindAttrib("Color", 1);
 	sSimple.LoadShader("src/simple.vert", "src/simple.frag");
-	sSimple.Use();
+
+	sTextured.BindAttrib("Position", 0);
+	sTextured.BindAttrib("UV", 1);
+	sTextured.LoadShader("src/textured.vert", "src/textured.frag");
+	sTextured.Use();
 	
 	lProjection = sSimple.GetLoc("ProjMtx");
 	
 
-	float stageVertices[] = {
-		200, 200, 	1, 1, 0,
-		500, 200,  	0, 1, 1,
-		500, 0,  	1, 0, 1,
+	float imageVertex[] = {
+		256, 256, 	0, 0,
+		512, 256,  	1, 0, 
+		512, 512,  	1, 1, 
+
+		512, 512, 	1, 1,
+		256, 512,  	0, 1,
+		256, 256,  	0, 0,
 	};
 
-	vao.Prepare(sizeof(stageVertices), stageVertices);
+	vao.Prepare(sizeof(imageVertex), imageVertex);
 	vao.Load();
 	
-	projection = glm::ortho<float>(0, clientRect.x/2.f, clientRect.y/2.f, 0, -1.f, 1.f);
+	projection = glm::ortho<float>(0, clientRect.x, clientRect.y, 0, -1.f, 1.f);
 	glUniformMatrix4fv(lProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
 	glViewport(0, 0, clientRect.x, clientRect.y);
@@ -62,4 +70,14 @@ void Render::SetModelView(glm::mat4&& view)
 void Render::UpdateProj(glm::mat4&& view)
 {
 	projection = view;
+}
+
+void Render::SetCg(CG *cg_)
+{
+	cg = cg_;
+	texture.Load(cg->draw_texture(100, false, false));
+	glActiveTexture(GL_TEXTURE0);
+	texture.Apply();
+	texture.Unload();
+
 }

@@ -467,7 +467,10 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			memcpy(str, data, 32);
 			str[32] = '\0';
 			
-			seq->name = str;
+			//TODO: verify and remove
+			seq->name = "PTIT ";
+			seq->name += str;
+			seq->name = sj2utf8(seq->name);
 			
 			data += 8;
 		} else if (!memcmp(buf, "PDST", 4)) {

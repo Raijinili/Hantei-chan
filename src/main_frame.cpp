@@ -19,7 +19,9 @@ context(context_)
 	WarmStyle();
 
 	framedata.load("test/akaakiha.HA6");
+	cg.load("test/akaakiha.cg");
 	mainPane.SetFrameData(&framedata);
+	render.SetCg(&cg);
 }
 
 void MainFrame::Draw()
@@ -35,7 +37,7 @@ void MainFrame::DrawBack()
 {
 	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	render.SetModelView(glm::translate(glm::mat4(1), glm::vec3(x>>1, y>>1, 0)));
+	render.SetModelView(glm::translate(glm::mat4(1), glm::vec3(x, y, 0)));
 	render.Draw();
 }
 
@@ -127,7 +129,6 @@ void MainFrame::DrawUi()
 		); 
 	ImGui::End();
 
-	ImGui::Text("%d,%d",x,y);
 	mainPane.Draw(); 
 
 

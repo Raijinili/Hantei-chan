@@ -18,8 +18,10 @@ add_executable(${EXE} WIN32
 	src/render.cpp
 	src/vao.cpp
 	src/shader.cpp
-
+	src/texture.cpp
+	
 	src/ha6/framedata.cpp
+	src/ha6/cg.cpp
 	src/ha6/misc.cpp
 	
 	res/res.rc
