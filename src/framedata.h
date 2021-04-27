@@ -2,6 +2,7 @@
 #define FRAMEDATA_H_GUARD
 
 #include <string>
+#include <vector>
 
 struct Hitbox {
 	short x1, y1, x2, y2;
@@ -94,29 +95,17 @@ struct Sequence {
 	// sequence property data
 	std::string	name;
 
-	int		subframe_count;
+	bool empty;
+	bool initialized;
 
-	bool		initialized;
+	std::vector<Frame> frames;
+	std::vector<Hitbox> hitboxes;
+	std::vector<Frame_AT> AT;
+	std::vector<Frame_AS> AS;
+	std::vector<Frame_EF> EF;
+	std::vector<Frame_IF> IF;
 
-	char		*data;
-
-	Frame	*frames;
-	unsigned int	nframes;
-
-	Hitbox	*hitboxes;
-	unsigned int	nhitboxes;
-
-	Frame_AT	*AT;
-	unsigned int	nAT;
-
-	Frame_AS	*AS;
-	unsigned int	nAS;
-
-	Frame_EF	*EF;
-	unsigned int	nEF;
-
-	Frame_IF	*IF;
-	unsigned int	nIF;
+	Sequence();
 };
 
 class FrameData {
@@ -126,7 +115,7 @@ private:
 	bool		m_loaded;
 public:
 
-	Sequence	**m_sequences;
+	Sequence	*m_sequences;
 	bool		load(const char *filename);
 
 	//Probably unnecessary.
@@ -134,13 +123,13 @@ public:
 
 	int get_sequence_count();
 
-	Sequence *get_sequence(int n);
+	Sequence* get_sequence(int n);
 	std::string GetDecoratedName(int n);
 
-	void free();
+	void Free();
 
-		FrameData();
-		~FrameData();
+	FrameData();
+	~FrameData();
 };
 
 

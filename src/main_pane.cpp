@@ -81,7 +81,7 @@ void MainPane::Draw()
 		
 		if(seq)
 		{
-			auto nframes = seq->nframes - 1;
+			int nframes = seq->frames.size() - 1;
 			if(nframes >= 0)
 			{			
 				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
@@ -112,6 +112,27 @@ void MainPane::Draw()
 			{
 				spriteId = -1;
 				ImGui::Text("This pattern has no frames.");
+			}
+			if (ImGui::TreeNode("Allocation info"))
+			{
+				constexpr float spacing = 100;
+				ImGui::Text("Hitboxes:"); ImGui::SameLine(spacing);
+				ImGui::Text("%llu", seq->hitboxes.size());
+				
+				ImGui::Text("nAT:"); ImGui::SameLine(spacing);
+				ImGui::Text("%llu", seq->AT.size());
+
+				ImGui::Text("nAS:"); ImGui::SameLine(spacing);
+				ImGui::Text("%llu", seq->AS.size());
+
+				ImGui::Text("nEF:"); ImGui::SameLine(spacing);
+				ImGui::Text("%llu", seq->EF.size());
+
+				ImGui::Text("nIF:"); ImGui::SameLine(spacing);
+				ImGui::Text("%llu", seq->IF.size());
+
+				ImGui::TreePop();
+				ImGui::Separator();
 			}
 		}
 		else

@@ -19,8 +19,8 @@ mainPane(&render)
 	
 	WarmStyle();
 
-	framedata.load("test/akaakiha.HA6");
-	cg.load("test/akaakiha.cg");
+	framedata.load("test/p_arc.HA6");
+	cg.load("test/p_arc.cg");
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
 	render.scale = 2;

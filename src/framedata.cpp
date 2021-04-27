@@ -9,6 +9,11 @@
 #include <sstream>
 #include <iomanip>
 
+Sequence::Sequence():
+empty(true),
+initialized(false)
+{}
+
 struct TempInfo {
 	Sequence	*seq;
 	
@@ -327,7 +332,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			if (!memcmp(buf, "HRAT", 4)) {
 				n += 25;
 			}
-			if (n <= 32 && info->cur_hitbox < info->seq->nhitboxes) {
+			if (n <= 32 && info->cur_hitbox < info->seq->hitboxes.size()) {
 				Hitbox *d = &info->seq->hitboxes[info->cur_hitbox];
 				++info->cur_hitbox;
 				
@@ -358,7 +363,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			data += 2;
 		} else if (!memcmp(buf, "ATST", 4)) {
 			// start attack block
-			if (info->cur_AT < info->seq->nAT) {
+			if (info->cur_AT < info->seq->AT.size()) {
 				frame->AT = &info->seq->AT[info->cur_AT];
 				++info->cur_AT;
 
@@ -366,7 +371,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			}
 		} else if (!memcmp(buf, "ASST", 4)) {
 			// start state block
-			if (info->cur_AS < info->seq->nAS) {
+			if (info->cur_AS < info->seq->AS.size()) {
 				frame->AS = &info->seq->AS[info->cur_AS];
 				++info->cur_AS;
 				
@@ -387,7 +392,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			// start effect block
 			int n = data[0];
 			++data;
-			if (n < 8 && info->cur_EF < info->seq->nEF) {
+			if (n < 8 && info->cur_EF < info->seq->EF.size()) {
 				frame->EF[n] = &info->seq->EF[info->cur_EF];
 				++info->cur_EF;
 				
@@ -397,7 +402,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			// start cancel block
 			int n = data[0];
 			++data;
-			if (n < 8 && info->cur_IF < info->seq->nIF) {
+			if (n < 8 && info->cur_IF < info->seq->IF.size()) {
 				frame->IF[n] = &info->seq->IF[info->cur_IF];
 				++info->cur_IF;
 				
@@ -419,10 +424,9 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 }
 
 static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *data_end,
-				Sequence *seq, unsigned int seq_id) {
+				Sequence *seq) {
 	TempInfo temp_info;
-	bool initialized = 0;
-	unsigned int frame_no = 0;
+	unsigned int frame_it = 0, nframes = 0;
 	
 	temp_info.seq = seq;
 	temp_info.cur_hitbox = 0;
@@ -462,31 +466,22 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			
 			data += 1 + ((len+3)/4);
 		} else if (!memcmp(buf, "PTIT", 4)) {
+			//TODO: verify and remove
+			assert(1);
 			// fixed-length sequence title
 			char str[33];
 			memcpy(str, data, 32);
 			str[32] = '\0';
 			
-			//TODO: verify and remove
-			seq->name = "PTIT ";
-			seq->name += str;
+			
+			seq->name = str;
 			seq->name = sj2utf8(seq->name);
 			
 			data += 8;
-		} else if (!memcmp(buf, "PDST", 4)) {
-			// old-style allocation
-			
-			// seems to alloc on demand as FSTR and whatnot
-			// are called. this will require a parsing pass
-			// that i don't care to do right now.
-			
-			// only G_CHAOS uses it and we don't really care
-			// about him anyway. Don't even have any way
-			// of rendering his shit!
 		} else if (!memcmp(buf, "PDS2", 4)) {
 			// this is an allocation call
 			// format:
-			// data[0] = byte count
+			// data[0] = byte count // Always 32?
 			// data[1] = frame count
 			// data[2] = hitbox count
 			// data[3] = EF count
@@ -497,77 +492,40 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			// from this we can tell what's referenced
 			// and what's static for each frame. yay!
 			if (data[0] == 32) {
-				// trash old data
-				if (seq->data) {
-					delete[] seq->data;
-				}
-				
-				seq->nframes = data[1];
-				seq->nhitboxes = data[2];
-				seq->nEF = data[3];
-				seq->nIF = data[4];
-				seq->nAT = data[5];
-				seq->nAS = data[7];
 
-				
-				int size;
-				size = sizeof(Frame) * seq->nframes;
-				size += sizeof(Hitbox) * seq->nhitboxes;
-				size += sizeof(Frame_AT) * seq->nAT;
-				size += sizeof(Frame_AS) * seq->nAS;
-				size += sizeof(Frame_EF) * seq->nEF;
-				size += sizeof(Frame_IF) * seq->nIF;
-				
-				char *data = new char[size];
-				seq->data = data;
-				
-				seq->frames = (Frame *)data;
-				size = sizeof(Frame) * seq->nframes;
-				
-				seq->hitboxes = (Hitbox *)(data + size);
-				size += sizeof(Hitbox) * seq->nhitboxes;
-				
-				seq->AT = (Frame_AT *)(data + size);
-				size += sizeof(Frame_AT) * seq->nAT;
-				
-				seq->AS = (Frame_AS *)(data + size);
-				size += sizeof(Frame_AS) * seq->nAS;
+				//Ended up a lot more simple huh
+				seq->frames.resize(data[1]);
+				seq->hitboxes.resize(data[2]);
+				seq->EF.resize(data[3]);
+				seq->IF.resize(data[4]);
+				seq->AT.resize(data[5]);
+				seq->AS.resize(data[7]);
 
-				seq->EF = (Frame_EF *)(data + size);
-				size += sizeof(Frame_EF) * seq->nEF;
-
-				seq->IF = (Frame_IF *)(data + size);
-				
-				seq->subframe_count = 0;
+				nframes = data[1];
 
 				seq->initialized = 1;
-				initialized = 1;
 			}
 			data += 1 + (data[0]/4);
 		} else if (!memcmp(buf, "FSTR", 4)) {
-			if (seq->initialized && frame_no < seq->nframes) {
-				Frame *frame = &seq->frames[frame_no];
-			
+			if (seq->initialized && frame_it < nframes) {
+				Frame *frame = &seq->frames[frame_it];
 				data = fd_frame_load(data, data_end, frame, &temp_info);
 			
-				++frame_no;
-			
-				seq->subframe_count += frame->AF.duration;
+				++frame_it;
 			}
 		} else if (!memcmp(buf, "PEND", 4)) {
 			break;
 		}
 	}
 	
-	if (initialized && seq->initialized && frame_no < seq->nframes) {
-		seq->nframes = frame_no;
-	}
+	if(seq->initialized)
+		assert(frame_it == nframes);
 	
 	return data;
 }
 
 static unsigned int *fd_main_load(unsigned int *data, const unsigned int *data_end,
-				Sequence **sequences,
+				Sequence *sequences,
 				unsigned int nsequences) {
 	while (data < data_end) {
 		unsigned int *buf = data;
@@ -580,20 +538,8 @@ static unsigned int *fd_main_load(unsigned int *data, const unsigned int *data_e
 			// make sure there's actually something here.
 			if (memcmp(data, "PEND", 4)) {
 				if (seq_id < nsequences) {
-					Sequence *seq = sequences[seq_id];
-					if (!seq) {
-						seq = new Sequence;
-						
-						sequences[seq_id] = seq;
-						
-						seq->subframe_count = 0;
-						
-						seq->initialized = 0;
-						seq->data = 0;
-						
-					}
-					
-					data = fd_sequence_load(data, data_end, seq, seq_id);
+					sequences[seq_id].empty = false;
+					data = fd_sequence_load(data, data_end, &sequences[seq_id]);
 				}
 			} else {
 				++data;
@@ -633,29 +579,11 @@ bool FrameData::load(const char *filename) {
 	
 	unsigned int sequence_count = d[1];
 	
-	if (m_sequences) {
-		if (sequence_count > m_nsequences) {
-			Sequence **seqs = new Sequence*[sequence_count];
-			for (unsigned int i = 0; i < m_nsequences; ++i) {
-				seqs[i] = m_sequences[i];
-			}
-			for (unsigned int i = m_nsequences; i < sequence_count; ++i) {
-				seqs[i] = 0;
-			}
-			delete[] m_sequences;
-			m_sequences = seqs;
-			m_nsequences = sequence_count;
-		}
-	} else {
-		m_nsequences = sequence_count;
-		m_sequences = new Sequence*[m_nsequences];
-		for (unsigned int i = 0; i < m_nsequences; ++i) {
-			m_sequences[i] = 0;
-		}
-	}
-	
-	d += 2;
-	
+	Free();
+	m_nsequences = sequence_count;
+	m_sequences = new Sequence[m_nsequences];
+
+	d += 2;	
 	// parse and recursively store data
 	d = fd_main_load(d, d_end, m_sequences, m_nsequences);
 	
@@ -685,24 +613,10 @@ static char *split_line(char **data) {
 	return start;
 }
 
-void FrameData::free() {
-	if (m_sequences) {
-		for (unsigned int i = 0; i < m_nsequences; ++i) {
-			Sequence *seq = m_sequences[i];
-		
-			if (seq) {
-				if (seq->data) {
-					delete[] seq->data;
-				}
-				delete seq;
-			}
-		}
-		delete[] m_sequences;
-		
-		m_sequences = 0;
-	}
+void FrameData::Free() {
+	delete[] m_sequences;
+	m_sequences = nullptr;
 	m_nsequences = 0;
-
 	m_loaded = 0;
 }
 
@@ -713,7 +627,7 @@ int FrameData::get_sequence_count() {
 	return m_nsequences;
 }
 
-Sequence *FrameData::get_sequence(int n) {
+Sequence* FrameData::get_sequence(int n) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -722,13 +636,7 @@ Sequence *FrameData::get_sequence(int n) {
 		return 0;
 	}
 	
-	Sequence *seq = m_sequences[n];
-	if (seq && !seq->initialized) {
-		assert(seq->initialized);
-		return 0;
-	}
-	
-	return seq;
+	return &m_sequences[n];
 }
 
 std::string FrameData::GetDecoratedName(int n)
@@ -736,24 +644,27 @@ std::string FrameData::GetDecoratedName(int n)
 		std::stringstream ss;
 		ss.flags(std::ios_base::right);
 		
-		if(m_sequences[n])
+		ss << std::setfill('0') << std::setw(3) << n;
+		if(!m_sequences[n].empty)
 		{
-			ss << std::setfill('0') << std::setw(3) << n << " " << m_sequences[n]->name;
-			if(m_sequences[n]->name.empty())
-					ss << "*";
+			ss << " ";
+			if(m_sequences[n].name.empty())
+			{
+				if(m_sequences[n].frames.empty())
+					ss << u8"〇";
+				else
+					ss << u8"Untitled";
+			}
+			else
+				ss << m_sequences[n].name;
+			
 		}
-		else
-		{
 
-			ss << std::setfill('0') << std::setw(3) << n;
-			
-		}
-			
 		return ss.str();
 }
 
 FrameData::FrameData() {
-	m_sequences = 0;
+	m_sequences = nullptr;
 	
 	m_nsequences = 0;
 	
@@ -761,5 +672,5 @@ FrameData::FrameData() {
 }
 
 FrameData::~FrameData() {
-	free();
+	Free();
 }
