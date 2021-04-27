@@ -2,7 +2,7 @@
 .cache
 /win64
 /test
-/src/ha6
+
 *.ini
 *.exe
 /cerr.txt

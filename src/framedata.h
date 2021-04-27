@@ -94,10 +94,6 @@ struct Sequence {
 	// sequence property data
 	std::string	name;
 
-	bool		is_move;
-	std::string	move_name;
-	int		move_meter;
-
 	int		subframe_count;
 
 	bool		initialized;

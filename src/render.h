@@ -14,10 +14,12 @@ private:
 	CG *cg;
 	Vao vSprite;
 	Vao vGeometry;
-	int geoParts[1];
+	
 	enum{
-		LINES = 0
+		LINES = 0,
+		GEO_SIZE
 	};
+	int geoParts[GEO_SIZE];
 
 	int lProjectionS, lProjectionT;
 	Shader sSimple;
@@ -32,8 +34,8 @@ private:
 	void SetMatrix(int location);
 
 public:
-	float x, offsetX;
-	float y, offsetY;
+	int x, offsetX;
+	int y, offsetY;
 	float scale;
 	
 	Render();

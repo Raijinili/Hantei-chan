@@ -591,8 +591,6 @@ static unsigned int *fd_main_load(unsigned int *data, const unsigned int *data_e
 						seq->initialized = 0;
 						seq->data = 0;
 						
-						seq->is_move = 0;
-						seq->move_meter = 0;
 					}
 					
 					data = fd_sequence_load(data, data_end, seq, seq_id);

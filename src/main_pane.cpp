@@ -102,7 +102,6 @@ void MainPane::Draw()
 					spriteId = frame.AF.frame;
 					render->offsetX = (frame.AF.offset_x-128)*2;
 					render->offsetY = (frame.AF.offset_y-224)*2;
-					render->SwitchImage(spriteId);
 				}
 				else
 				{
@@ -111,11 +110,13 @@ void MainPane::Draw()
 			}
 			else
 			{
+				spriteId = -1;
 				ImGui::Text("This pattern has no frames.");
 			}
 		}
 		else
 		{
+			spriteId = -1;
 			ImGui::Text("This pattern is empty.");
 		}
 	}
@@ -127,5 +128,5 @@ void MainPane::Draw()
 
 	ImGui::End();
 
-
+	render->SwitchImage(spriteId);
 }

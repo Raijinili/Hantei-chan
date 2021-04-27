@@ -203,7 +203,7 @@ void MainFrame::WarmStyle()
 	colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(0.70f, 0.70f, 0.70f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
-	ChangeClearColor(0.695f, 0.757f, 0.608f);
+	ChangeClearColor(0.324f, 0.409f, 0.185f);
 }
 
 void MainFrame::ChangeClearColor(float r, float g, float b)

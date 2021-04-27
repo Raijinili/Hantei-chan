@@ -193,7 +193,8 @@ ImageData *CG::draw_texture(unsigned int n, bool to_pow2_flg, bool draw_8bpp) {
 	}
 	
 	// check to see if we need a custom palette
-	unsigned int custom_palette[256];
+	static unsigned int custom_palette[256];
+	bool needsCustom = false;
 	if (image->bpp == 32) {
 		if (image->type_id == 3) {
 			unsigned int color = *(unsigned int *)image->data;
@@ -205,14 +206,14 @@ ImageData *CG::draw_texture(unsigned int n, bool to_pow2_flg, bool draw_8bpp) {
 				custom_palette[i] = (i << 24) | color;
 			}
 			
-			palette = custom_palette;
+			needsCustom = true;
 		} else if (image->type_id == 2 || image->type_id == 4) {
 			memcpy(custom_palette, image->data, 1024);
 			
 			for (int i = 0; i < 256; ++i) {
 				custom_palette[i] = (0xff << 24) | custom_palette[i];
 			}
-			palette = custom_palette;
+			needsCustom = true;
 		}
 	}
 	
@@ -232,7 +233,7 @@ ImageData *CG::draw_texture(unsigned int n, bool to_pow2_flg, bool draw_8bpp) {
 	
 	align = &m_align[image->align_start];
 	for (unsigned int i = 0; i < image->align_len; ++i, ++align) {
-		copy_cells(image, align, pixels, x1, y1, width, height, palette, is_8bpp);
+		copy_cells(image, align, pixels, x1, y1, width, height, needsCustom ? custom_palette : palette, is_8bpp);
 	}
 	
 	// finalize in texture
@@ -267,10 +268,7 @@ void CG::build_image_table() {
 	// Create new image table and initialize it.
 	pages = new Page[page_count];
 	memset(pages, 0, sizeof(Page) * page_count);
-	
-/* 	pagePixData = new ImageData[page_count];
-	memset(pagePixData, 0, sizeof(ImageData) * page_count);
-	 */
+
 	// Go through and initialize all the cells.
 
 	int maxCelln = 0;
@@ -314,10 +312,7 @@ void CG::build_image_table() {
 
 			if(cell_n > maxCelln)
 				maxCelln = cell_n;
-			
-/* 			if(!pagePixData[align->source_image].pixels)
-				pagePixData[align->source_image].pixels = new char[256*256*]
-			 */
+
 			if (x + w >= 0x10) {
 				w = 0x10 - x;
 			}

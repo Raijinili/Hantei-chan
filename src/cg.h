@@ -66,12 +66,11 @@ protected:
 		unsigned short		bpp;
 	};
 
-	//Hantei4 calls these "pages" which makes more sense than image.
+	//Hantei4 calls these "pages".
 	struct Page {
 		ImageCell		cell[256];
 	};
 
-	ImageData	pagePixData;
 	Page				*pages;
 	unsigned int			page_count;
 
