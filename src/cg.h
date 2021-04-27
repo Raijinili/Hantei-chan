@@ -66,12 +66,14 @@ protected:
 		unsigned short		bpp;
 	};
 
-	struct Image {
+	//Hantei4 calls these "pages" which makes more sense than image.
+	struct Page {
 		ImageCell		cell[256];
 	};
 
-	Image				*m_image_table;
-	unsigned int			m_image_count;
+	ImageData	pagePixData;
+	Page				*pages;
+	unsigned int			page_count;
 
 	void			copy_cells(
 					const CG_Image *image,

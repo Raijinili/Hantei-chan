@@ -15,11 +15,12 @@
 }
  */
 
-MainPane::MainPane():
+MainPane::MainPane(Render* render_):
 frameData(nullptr),
 currentPattern(-1),
 currFrame(0),
-decoratedNames(nullptr)
+decoratedNames(nullptr),
+render(render_)
 {
 	
 } 
@@ -94,6 +95,19 @@ void MainPane::Draw()
 				ImGui::PopButtonRepeat();
 				ImGui::SameLine();
 				ImGui::Text("%d/%d", currFrame+1, nframes+1);
+
+				Frame &frame = seq->frames[currFrame];
+				if(frame.AF.active)
+				{
+					spriteId = frame.AF.frame;
+					render->offsetX = (frame.AF.offset_x-128)*2;
+					render->offsetY = (frame.AF.offset_y-224)*2;
+					render->SwitchImage(spriteId);
+				}
+				else
+				{
+					spriteId = -1;	
+				}
 			}
 			else
 			{

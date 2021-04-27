@@ -1,7 +1,7 @@
 #ifndef IMAGE_H_INCLUDED
 #define IMAGE_H_INCLUDED
 #include <string>
-#include <ha6/cg.h>
+#include "cg.h"
 #include <memory>
 
 extern int pal;

@@ -2,6 +2,8 @@
 #include "context_gl.h"
 #include "main_frame.h"
 
+#include <iostream>
+#include <fstream>
 #include <cstring>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -42,6 +44,11 @@ void LoadJapaneseFonts(ImGuiIO& io)
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
+	std::ofstream coutFile, cerrFile;
+	coutFile.open("cout.txt"); cerrFile.open("cerr.txt"); 
+	auto cout_buf = std::cout.rdbuf(coutFile.rdbuf());
+	auto cerr_buf = std::cerr.rdbuf(cerrFile.rdbuf());
+
 	// Create application window
 	//ImGui_ImplWin32_EnableDpiAwareness();
 	WNDCLASSEX wc = {

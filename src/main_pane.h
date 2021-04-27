@@ -1,21 +1,24 @@
 #ifndef MAINPANE_H_GUARD
 #define MAINPANE_H_GUARD
 #include "draw_window.h"
-#include <ha6/framedata.h>
+#include "framedata.h"
+#include "render.h"
 #include <string>
 
 //This is the main pane on the left
 class MainPane : DrawWindow
 {
 public:
-	MainPane();
+	MainPane(Render* render);
 	void Draw();
 	void SetFrameData(FrameData *frameData);
 
 private:
+	Render *render;
 	FrameData *frameData;
 	int currentPattern;
 	int currFrame;
+	int spriteId;
 
 	std::string *decoratedNames;
 };

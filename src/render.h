@@ -1,7 +1,7 @@
 #ifndef RENDER_H_GUARD
 #define RENDER_H_GUARD
 #include <glm/mat4x4.hpp>
-#include <ha6/cg.h>
+#include "cg.h"
 #include "texture.h"
 #include "shader.h"
 #include "vao.h"
@@ -9,22 +9,40 @@
 class Render
 {
 private:
+	glm::mat4 projection, view;
+	
 	CG *cg;
-	Vao vao;
-	int lProjection;
+	Vao vSprite;
+	Vao vGeometry;
+	int geoParts[1];
+	enum{
+		LINES = 0
+	};
+
+	int lProjectionS, lProjectionT;
 	Shader sSimple;
 	Shader sTextured;
-
 	Texture texture;
+	int curImageId;
+	float imageVertex[6*4];
+
+	void AdjustImageQuad(int x, int y, int w, int h);
+
+	void SetModelView(glm::mat4&& view);
+	void SetMatrix(int location);
 
 public:
-	glm::mat4 projection;
+	float x, offsetX;
+	float y, offsetY;
+	float scale;
 	
 	Render();
 	void Draw();
-	void SetModelView(glm::mat4&& view);
 	void UpdateProj(glm::mat4&& proj);
+
+
 	void SetCg(CG *cg);
+	void SwitchImage(int id);
 };
 
 #endif /* RENDER_H_GUARD */

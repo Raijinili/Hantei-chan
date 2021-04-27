@@ -3,8 +3,8 @@
 #include "context_gl.h"
 #include "render.h"
 #include "main_pane.h"
-#include <ha6/framedata.h>
-#include <ha6/cg.h>
+#include "framedata.h"
+#include "cg.h"
 #include <glm/mat4x4.hpp>
 
 

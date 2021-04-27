@@ -20,14 +20,14 @@ add_executable(${EXE} WIN32
 	src/shader.cpp
 	src/texture.cpp
 	
-	src/ha6/framedata.cpp
-	src/ha6/cg.cpp
-	src/ha6/misc.cpp
+	src/framedata.cpp
+	src/cg.cpp
+	src/misc.cpp
 	
 	res/res.rc
 )
 
-target_include_directories(${EXE} PRIVATE "." "src")
+target_include_directories(${EXE} PRIVATE ".")
 target_compile_definitions(${EXE} PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN)
 
 find_package(OpenGL REQUIRED)

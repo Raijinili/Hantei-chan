@@ -1,7 +1,9 @@
 .vscode
 .cache
 /win64
-/compat
 /test
+/src/ha6
 *.ini
 *.exe
+/cerr.txt
+/cout.txt

@@ -64,6 +64,7 @@ void Vao::Bind()
 {
 	//glBindVertexArray(vaoId);
 	//Since we now have to keep the state ourselves.
+	glBindBuffer(GL_ARRAY_BUFFER, vboId);
 	switch(type)
 	{
 	case F2F3:

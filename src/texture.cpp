@@ -1,5 +1,5 @@
 #include "texture.h"
-#include <ha6/cg.h>
+#include "cg.h"
 #include <glad/glad.h>
 
 #include <fstream>

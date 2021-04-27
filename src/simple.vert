@@ -9,6 +9,6 @@ uniform mat4 ProjMtx;
 void main()
 {
     
-    Frag_Color = vec4(Color, 1.0);
+    Frag_Color = vec4(Color, 0.8);
     gl_Position = ProjMtx * vec4(Position, 0, 1);
 };

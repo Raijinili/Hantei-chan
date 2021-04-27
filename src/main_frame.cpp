@@ -13,7 +13,8 @@
 bool show_demo_window = false;
 
 MainFrame::MainFrame(ContextGl *context_):
-context(context_)
+context(context_),
+mainPane(&render)
 {
 	
 	WarmStyle();
@@ -22,13 +23,13 @@ context(context_)
 	cg.load("test/akaakiha.cg");
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
+	render.scale = 2;
 }
 
 void MainFrame::Draw()
 {
 	DrawBack();
 	DrawUi();
-	
 
 	SwapBuffers(context->dc);
 }
@@ -37,7 +38,8 @@ void MainFrame::DrawBack()
 {
 	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	render.SetModelView(glm::translate(glm::mat4(1), glm::vec3(x, y, 0)));
+	render.x = x+clientRect.x/2+150;
+	render.y = y+clientRect.y/2+150;
 	render.Draw();
 }
 
@@ -117,7 +119,7 @@ void MainFrame::DrawUi()
 			ImGuiID dock_down_id = ImGui::DockBuilderSplitNode(toSplit, ImGuiDir_Down, 0.45f, nullptr, &toSplit);
 
 			ImGui::DockBuilderDockWindow("Left Pane", dock_left_id);
- 			ImGui::DockBuilderDockWindow("Bottom Pane", dock_down_id);
+ 			ImGui::DockBuilderDockWindow("Debug", dock_down_id);
 
 			ImGui::DockBuilderFinish(dockspaceID);
 		}
