@@ -18,7 +18,6 @@
 ImVec2 clientRect;
 
 HWND mainWindowHandle;
-static ContextGl *context;
 static bool dragWindow;
 static POINT mousePos;
 
@@ -91,51 +90,28 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		L"Main window", NULL 
 	};
 
+	MainFrame *frame;
 	::RegisterClassEx(&wc);
-	HWND hwnd = ::CreateWindow(wc.lpszClassName, L"HA6GUI: 判定ちゃん６", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+	HWND hwnd = ::CreateWindow(wc.lpszClassName, L"HA6GUI: 判定ちゃん６", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, &frame);
 	mainWindowHandle = hwnd;
 	::ShowWindow(hwnd, nCmdShow);
 	::UpdateWindow(hwnd);
-	
 
-
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.IniFilename = nullptr;
-	LoadJapaneseFonts(io);
-
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	
-	ImGui::StyleColorsLight();
-
-	ImGui_ImplWin32_Init(hwnd);
-	ImGui_ImplOpenGL3_Init("#version 120");
-
-	MainFrame frame(context);
-	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&frame);
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
+		frame->Draw(); //Might not be a good idea to keep this here.
 		::TranslateMessage(&msg);
 		::DispatchMessage(&msg);
 		if (msg.message == WM_QUIT)
 		{
 			break;
 		}
-		frame.Draw();
 	}
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
 
-	delete context;
-	::DestroyWindow(hwnd);
-	::UnregisterClass(wc.lpszClassName, wc.hInstance);
+	DestroyWindow(hwnd);
+	UnregisterClass(wc.lpszClassName, wc.hInstance);
 	return 0;
 }
 
@@ -151,13 +127,26 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		{
-			context = new ContextGl(hWnd);
+			ContextGl *context = new ContextGl(hWnd);
 			if(!gladLoadGL())
 			{
 				MessageBox(0, L"glad fail", L"gladLoadGL()", 0);
 				PostQuitMessage(1);
 				return 1;
 			}
+			IMGUI_CHECKVERSION();
+			ImGui::CreateContext();
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.IniFilename = nullptr;
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+			LoadJapaneseFonts(io);
+			ImGui_ImplWin32_Init(hWnd);
+			ImGui_ImplOpenGL3_Init("#version 120");
+
+			MainFrame** mf = (MainFrame**)((CREATESTRUCT*)lParam)->lpCreateParams;
+			*mf = new MainFrame(context);
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)*mf);
 			return 0;
 		}
 	case WM_SIZE:
@@ -207,6 +196,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		break;
 	case WM_DESTROY:
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+		delete mf;
 		::PostQuitMessage(0);
 		return 0;
 	}

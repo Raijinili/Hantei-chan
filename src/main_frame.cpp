@@ -27,6 +27,11 @@ mainPane(&render)
 	render.scale = 2;
 }
 
+MainFrame::~MainFrame()
+{
+	delete context;
+}
+
 void MainFrame::Draw()
 {
 	DrawBack();

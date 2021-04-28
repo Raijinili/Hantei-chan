@@ -12,7 +12,7 @@ class MainFrame
 {
 public:
 	MainFrame(ContextGl *context);
-	
+	~MainFrame();
 	
 	void Draw();
 	void UpdateBackProj(glm::mat4 &&mat);
