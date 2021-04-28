@@ -10,5 +10,5 @@ void main()
 {
     
     Frag_Color = vec4(Color, 0.8);
-    gl_Position = ProjMtx * vec4(Position, 0, 1);
+    gl_Position = ProjMtx * vec4(Position, -1, 1);
 };

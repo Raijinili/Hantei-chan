@@ -20,8 +20,8 @@ mainPane(&render)
 {
 	WarmStyle();
 
-/* 	framedata.load("test/ries.HA6");
-	cg.load("test/ries.cg"); */
+	framedata.load("test/ries.HA6");
+	cg.load("test/ries.cg");
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
 	render.scale = 2;

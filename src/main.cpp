@@ -90,9 +90,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		L"Main window", NULL 
 	};
 
-	MainFrame *frame;
 	::RegisterClassEx(&wc);
-	HWND hwnd = ::CreateWindow(wc.lpszClassName, L"HA6GUI: 判定ちゃん６", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, &frame);
+	HWND hwnd = ::CreateWindow(wc.lpszClassName, L"HA6GUI: 判定ちゃん６", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, nullptr);
 	mainWindowHandle = hwnd;
 	::ShowWindow(hwnd, nCmdShow);
 	::UpdateWindow(hwnd);
@@ -100,13 +99,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		frame->Draw(); //Might not be a good idea to keep this here.
-		::TranslateMessage(&msg);
-		::DispatchMessage(&msg);
-		if (msg.message == WM_QUIT)
-		{
-			break;
-		}
+		
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		MainFrame* mf = (MainFrame*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		if(mf)
+			mf->Draw();
 	}
 
 
@@ -144,9 +142,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			ImGui_ImplWin32_Init(hWnd);
 			ImGui_ImplOpenGL3_Init("#version 120");
 
-			MainFrame** mf = (MainFrame**)((CREATESTRUCT*)lParam)->lpCreateParams;
-			*mf = new MainFrame(context);
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)*mf);
+			MainFrame* mf = new MainFrame(context);
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)mf);
 			return 0;
 		}
 	case WM_SIZE:
@@ -200,8 +197,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
 		delete mf;
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
 		::PostQuitMessage(0);
 		return 0;
 	}
+
+	
 	return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
