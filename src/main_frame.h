@@ -15,7 +15,7 @@ public:
 	~MainFrame();
 	
 	void Draw();
-	void UpdateBackProj(glm::mat4 &&mat);
+	void UpdateBackProj(float x, float y);
 	void HandleMouseDrag(int x, int y);
 	
 

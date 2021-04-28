@@ -28,6 +28,7 @@ private:
 	int quadsToDraw;
 
 	int lProjectionS, lProjectionT;
+	int lAlphaS;
 	Shader sSimple;
 	Shader sTextured;
 	Texture texture;
@@ -46,7 +47,7 @@ public:
 	
 	Render();
 	void Draw();
-	void UpdateProj(glm::mat4&& proj);
+	void UpdateProj(float w, float h);
 
 	void GenerateHitboxVertices(Hitbox **hitboxes, int size);
 	void SetCg(CG *cg);

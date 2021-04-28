@@ -13,7 +13,6 @@
 
 bool show_demo_window = false;
 
-
 MainFrame::MainFrame(ContextGl *context_):
 context(context_),
 mainPane(&render)
@@ -43,7 +42,7 @@ void MainFrame::Draw()
 void MainFrame::DrawBack()
 {
 	glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT);
 	render.x = x+clientRect.x/2+150;
 	render.y = y+clientRect.y/2+150;
 	render.Draw();
@@ -261,10 +260,10 @@ void MainFrame::ChangeClearColor(float r, float g, float b)
 	clearColor[2] = b;
 }
 
-void MainFrame::UpdateBackProj(glm::mat4 &&mat)
+void MainFrame::UpdateBackProj(float x, float y)
 {
-	render.UpdateProj(std::move(mat));
-	glViewport(0, 0, clientRect.x, clientRect.y);
+	render.UpdateProj(x, y);
+	glViewport(0, 0, x, y);
 }
 
 void MainFrame::HandleMouseDrag(int x_, int y_)

@@ -11,7 +11,6 @@
 #include <windows.h>
 #include <commdlg.h>
 #include <glad/glad.h>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <res/resource.h>
 
@@ -78,8 +77,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	auto cout_buf = std::cout.rdbuf(coutFile.rdbuf());
 	auto cerr_buf = std::cerr.rdbuf(cerrFile.rdbuf());
 
-	// Create application window
-	//ImGui_ImplWin32_EnableDpiAwareness();
 	WNDCLASSEX wc = {
 		sizeof(WNDCLASSEX),
 		CS_CLASSDC,
@@ -99,14 +96,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 		MainFrame* mf = (MainFrame*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 		if(mf)
 			mf->Draw();
 	}
-
 
 	DestroyWindow(hwnd);
 	UnregisterClass(wc.lpszClassName, wc.hInstance);
@@ -152,9 +147,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RECT rect;
 			GetClientRect(mainWindowHandle, &rect);
 			clientRect = ImVec2((float)rect.right, (float)rect.bottom);
-
-			//TODO: TAke this out of here
-			mf->UpdateBackProj(glm::ortho<float>(0, clientRect.x, clientRect.y, 0));
+			mf->UpdateBackProj(clientRect.x, clientRect.y);
 		}
 		return 0;
 	case WM_LBUTTONDOWN:
@@ -183,7 +176,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			newMousePos.x = (short) LOWORD(lParam);
 			newMousePos.y = (short) HIWORD(lParam);
 
-			
 			mf->HandleMouseDrag(newMousePos.x-mousePos.x, newMousePos.y-mousePos.y);
 			mousePos = newMousePos;
 		}
@@ -202,6 +194,5 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 
-	
 	return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }

@@ -15,7 +15,7 @@
 Render::Render():
 cg(nullptr),
 vSprite(Vao::F2F2, GL_DYNAMIC_DRAW),
-vGeometry(Vao::F2F3, GL_STREAM_DRAW),
+vGeometry(Vao::F3F3, GL_STREAM_DRAW),
 curImageId(-1),
 imageVertex{
 	256, 256, 	0, 0,
@@ -33,11 +33,13 @@ y(0), offsetY(0)
 	sSimple.BindAttrib("Position", 0);
 	sSimple.BindAttrib("Color", 1);
 	sSimple.LoadShader("src/simple.vert", "src/simple.frag");
+	sSimple.Use();
 
 	sTextured.BindAttrib("Position", 0);
 	sTextured.BindAttrib("UV", 1);
 	sTextured.LoadShader("src/textured.vert", "src/textured.frag");
 	
+	lAlphaS = sSimple.GetLoc("Alpha");
 	lProjectionS = sSimple.GetLoc("ProjMtx");
 	lProjectionT = sTextured.GetLoc("ProjMtx");
 
@@ -46,23 +48,23 @@ y(0), offsetY(0)
 
 	float lines[]
 	{
-		-10000, 0,	1,1,1,
-		10000, 0,	1,1,1,
-		0, 10000,	1,1,1,
-		0, -10000,	1,1,1,
+		-10000, 0, -1,	1,1,1,
+		10000, 0, -1,	1,1,1,
+		0, 10000, -1,	1,1,1,
+		0, -10000, -1,	1,1,1,
 	};
 
 	geoParts[LINES] = vGeometry.Prepare(sizeof(lines), lines);
-	geoParts[BOXES] = vGeometry.Prepare(sizeof(float)*5*4*128, nullptr);
+	geoParts[BOXES] = vGeometry.Prepare(sizeof(float)*6*4*128, nullptr);
 	vGeometry.Load();
 	vGeometry.InitQuads(geoParts[BOXES]);
 
-	projection = glm::ortho<float>(0, clientRect.x, clientRect.y, 0, -1.f, 1.f);
+	UpdateProj(clientRect.x, clientRect.y);
 
 	glViewport(0, 0, clientRect.x, clientRect.y);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+	glEnable(GL_DEPTH_TEST);
 }
 
 void Render::Draw()
@@ -74,6 +76,16 @@ void Render::Draw()
 		MessageBoxA(nullptr, ss.str().c_str(), "GL Error", MB_ICONSTOP);
 		//PostQuitMessage(1);
 	}
+	SetModelView(
+		glm::scale(
+			glm::translate(glm::mat4(1), glm::vec3(x,y,0)),
+			glm::vec3(scale, scale, 1.f)
+		)
+	);
+	glUniform1f(lAlphaS, 0.55f);
+	SetMatrix(lProjectionS);
+	vGeometry.Bind();
+	vGeometry.Draw(geoParts[LINES], 0, GL_LINES);
 
 	SetModelView(
 		glm::scale(
@@ -89,19 +101,13 @@ void Render::Draw()
 		vSprite.Draw(0);
 	}
 
-	SetModelView(
-		glm::scale(
-			glm::translate(glm::mat4(1), glm::vec3(x,y,0)),
-			glm::vec3(scale, scale, 1.f)
-		)
-	);
+
 	sSimple.Use();
-	SetMatrix(lProjectionS);
 	vGeometry.Bind();
-	vGeometry.Draw(geoParts[LINES], 0, GL_LINES);
+	glUniform1f(lAlphaS, 1.f);
 	vGeometry.DrawQuads(GL_LINE_LOOP, quadsToDraw);
-
-
+	glUniform1f(lAlphaS, 0.2f);
+	vGeometry.DrawQuads(GL_TRIANGLE_FAN, quadsToDraw);
 }
 
 void Render::SetModelView(glm::mat4&& view_)
@@ -114,9 +120,9 @@ void Render::SetMatrix(int lProjection)
 	glUniformMatrix4fv(lProjection, 1, GL_FALSE, glm::value_ptr(projection*view));
 }
 
-void Render::UpdateProj(glm::mat4&& view)
+void Render::UpdateProj(float w, float h)
 {
-	projection = view;
+	projection = glm::ortho<float>(0, w, h, 0, -10.f, 10.f);
 }
 
 void Render::SetCg(CG *cg_)
@@ -167,28 +173,20 @@ void Render::GenerateHitboxVertices(Hitbox **hitboxes, int size)
 	static Hitbox **lastHitbox = 0;
 	static int lastSize = 0;
 
-/* 	if(lastHitbox != hitboxes && size != lastSize)
-	{
-		lastSize = size;
-		lastHitbox = hitboxes;
-	}
-	else
-		return; */
-
 	const float *color;
-
-	constexpr float redColor[] {1,0,0};
-	constexpr float cyan[] {0,1,1}; //飛び道具？
-	constexpr float clashColor[] {1,1,0};
-	constexpr float collisionColor[] {1,1,1};
-	constexpr float purple[] {1,0,1}; //特別
-	constexpr float greenColor[] {0,1,0};
-	constexpr float shieldColor[] {0,0,1};
+	//red, green, blue, z order
+	constexpr float collisionColor[] 	{1, 1, 1, 1};
+	constexpr float greenColor[] 		{0, 1, 0, 2};
+	constexpr float redColor[] 			{1, 0, 0, 3};
+	constexpr float clashColor[]		{1, 1, 0, 4};
+	constexpr float shieldColor[] 		{0, 0, 1, 5};
+	constexpr float purple[] 			{1, 0, 1, 6}; //特別
+	constexpr float projectileColor[] 	{0, 1, 1, 7}; //飛び道具？
 
 	constexpr int tX[] = {0,1,1,0};
 	constexpr int tY[] = {0,0,1,1};
 
-	int floats = size*4*5; //4 Vertices with 5 attributes.
+	int floats = size*4*6; //4 Vertices with 6 attributes.
 	if(clientQuads.size() < floats)
 		clientQuads.resize(floats);
 	
@@ -207,22 +205,24 @@ void Render::GenerateHitboxVertices(Hitbox **hitboxes, int size)
 		else if(i == 11)
 			color = clashColor;
 		else if(i == 12)
-			color = cyan;
+			color = projectileColor;
 		else if(i>12 && i<=24)
 			color = purple;
 		else
 			color = redColor;
 
 		
-		for(int j = 0; j < 4*5; j+=5)
+		for(int j = 0; j < 4*6; j+=6)
 		{
+			//X, Y, Z, R, G, B
 			clientQuads[dataI+j+0] = hitboxes[i]->x1 + (hitboxes[i]->x2-hitboxes[i]->x1)*tX[j/5];
 			clientQuads[dataI+j+1] = hitboxes[i]->y1 + (hitboxes[i]->y2-hitboxes[i]->y1)*tY[j/5];
-			clientQuads[dataI+j+2] = color[0];
-			clientQuads[dataI+j+3] = color[1];
-			clientQuads[dataI+j+4] = color[2];
+			clientQuads[dataI+j+2] = color[3];
+			clientQuads[dataI+j+3] = color[0];
+			clientQuads[dataI+j+4] = color[1];
+			clientQuads[dataI+j+5] = color[2];
 		}
-		dataI += 4*5;
+		dataI += 4*6;
 	}
 	quadsToDraw = size;
 	vGeometry.UpdateBuffer(geoParts[BOXES], clientQuads.data(), dataI*sizeof(float));
