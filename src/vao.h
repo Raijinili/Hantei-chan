@@ -32,6 +32,9 @@ private:
 	unsigned int vaoId;
 	unsigned int vboId;
 
+	GLint *quadIndexes;
+	GLint *quadCount;
+	GLsizei quadSize;
 
 public:
 	Vao(AttribType type, unsigned int usage);
@@ -40,6 +43,9 @@ public:
 	//Returns index of object that can be drawn.
 	int Prepare(size_t size, void *ptr);
 	void Draw(int which, size_t count = 0, int mode = GL_TRIANGLES);
+
+	void InitQuads(int which);
+	void DrawQuads(int mode = GL_LINE_LOOP, int numberOf =-1);
 	void UpdateBuffer(int which, void *data, size_t count = 0);
 	void Bind();
 	void Load();

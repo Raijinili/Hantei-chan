@@ -4,7 +4,8 @@
 #include <sstream>
 
 Vao::Vao(AttribType _type, unsigned int _usage):
-type(_type), usage(_usage), loaded(false), stride(0), totalSize(0), vaoId(0), vboId(0)
+type(_type), usage(_usage), loaded(false), stride(0), totalSize(0), vaoId(0), vboId(0),
+quadCount(nullptr), quadIndexes(nullptr)
 {
 	//glGenVertexArrays(1, &vaoId);
 	switch(type)
@@ -22,6 +23,7 @@ Vao::~Vao()
 {
 	//glDeleteVertexArrays(1, &vaoId);
 	glDeleteBuffers(1, &vboId);
+	delete[] quadIndexes;
 }
 
 int Vao::Prepare(size_t size, void *ptr)
@@ -48,6 +50,29 @@ void Vao::Draw(int which, size_t count, int mode)
 	if(count == 0)
 		count = dataPointers[which].size/stride;
 	glDrawArrays(mode, dataPointers[which].location, count);
+}
+
+void Vao::InitQuads(int which)
+{
+	if(!quadIndexes)
+	{
+		quadSize = (dataPointers[which].size/stride)/4;
+		quadIndexes = new GLint[quadSize*2];
+		quadCount = quadIndexes+quadSize;
+		for(int i = 0; i < quadSize; i++)
+		{
+			quadIndexes[i] = dataPointers[which].location + i*4;
+			quadCount[i] = 4;
+		}
+	}
+}
+
+void Vao::DrawQuads(int mode, int numberOf)
+{
+	if(numberOf<0)
+		numberOf = quadSize;
+	if(quadIndexes)
+		glMultiDrawArrays(mode, quadIndexes, quadCount, numberOf);
 }
 
 void Vao::UpdateBuffer(int which, void *data, size_t count)

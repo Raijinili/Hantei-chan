@@ -1,10 +1,13 @@
 #ifndef RENDER_H_GUARD
 #define RENDER_H_GUARD
-#include <glm/mat4x4.hpp>
+
 #include "cg.h"
 #include "texture.h"
 #include "shader.h"
 #include "vao.h"
+#include "hitbox.h"
+#include <vector>
+#include <glm/mat4x4.hpp>
 
 class Render
 {
@@ -14,19 +17,22 @@ private:
 	CG *cg;
 	Vao vSprite;
 	Vao vGeometry;
-	
 	enum{
 		LINES = 0,
+		BOXES,
 		GEO_SIZE
 	};
 	int geoParts[GEO_SIZE];
+	float imageVertex[6*4];
+	std::vector<float> clientQuads;
+	int quadsToDraw;
 
 	int lProjectionS, lProjectionT;
 	Shader sSimple;
 	Shader sTextured;
 	Texture texture;
 	int curImageId;
-	float imageVertex[6*4];
+	
 
 	void AdjustImageQuad(int x, int y, int w, int h);
 
@@ -42,9 +48,10 @@ public:
 	void Draw();
 	void UpdateProj(glm::mat4&& proj);
 
-
+	void GenerateHitboxVertices(Hitbox **hitboxes, int size);
 	void SetCg(CG *cg);
 	void SwitchImage(int id);
+	void DontDraw();
 };
 
 #endif /* RENDER_H_GUARD */

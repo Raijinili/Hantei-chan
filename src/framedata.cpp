@@ -321,29 +321,27 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_end,
 				Frame *frame, TempInfo *info) {
 	memset(frame, 0, sizeof(Frame));
-	
+	int boxesCount = 0;
 	while (data < data_end) {
 		unsigned int *buf = data;
 		++data;
 		
 		if (!memcmp(buf, "HRNM", 4) || !memcmp(buf, "HRAT", 4)) {
 			// read hitbox or attackbox
-			unsigned int n = data[0];
+			unsigned int location = data[0];
 			if (!memcmp(buf, "HRAT", 4)) {
-				n += 25;
+				location += 25;
 			}
-			if (n <= 32 && info->cur_hitbox < info->seq->hitboxes.size()) {
-				Hitbox *d = &info->seq->hitboxes[info->cur_hitbox];
+			if (location <= 32 && info->cur_hitbox < info->seq->hitboxes.size()) {
+				Hitbox *hitbox = &info->seq->hitboxes[info->cur_hitbox];
 				++info->cur_hitbox;
+				boxesCount++;
 				
-				frame->hitboxes[n] = d;
-			
-				int *dt = (int *)data;
-			
-				d->x1 = (dt[1]);
-				d->y1 = (dt[2]);
-				d->x2 = (dt[3]);
-				d->y2 = (dt[4]);
+				frame->hitboxes[location] = hitbox;
+				hitbox->x1 = (data[1]);
+				hitbox->y1 = (data[2]);
+				hitbox->x2 = (data[3]);
+				hitbox->y2 = (data[4]);
 			}
 			
 			data += 5;
@@ -351,6 +349,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			// read hitbox reference
 			unsigned int location = data[0];
 			unsigned int source = data[1];
+			boxesCount++;
 			
 			if (!memcmp(buf, "HRAS", 4)) {
 				location += 25;
@@ -418,6 +417,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 		// FSNE(1) ?
 		// FSNI(1) ?
 		// (no others)
+		frame->nHitbox=boxesCount;
 	}
 	
 	return data;
@@ -467,7 +467,7 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			data += 1 + ((len+3)/4);
 		} else if (!memcmp(buf, "PTIT", 4)) {
 			//TODO: verify and remove
-			assert(1);
+			assert("PTIT");
 			// fixed-length sequence title
 			char str[33];
 			memcpy(str, data, 32);
@@ -512,6 +512,10 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				data = fd_frame_load(data, data_end, frame, &temp_info);
 			
 				++frame_it;
+			}
+			else
+			{
+				assert("Actual frame number and PDS2 don't match");
 			}
 		} else if (!memcmp(buf, "PEND", 4)) {
 			break;

@@ -107,11 +107,14 @@ void MainPane::Draw()
 				{
 					spriteId = -1;	
 				}
+
+				render->GenerateHitboxVertices(frame.hitboxes, frame.nHitbox);
 			}
 			else
 			{
 				spriteId = -1;
 				ImGui::Text("This pattern has no frames.");
+				render->DontDraw();
 			}
 			if (ImGui::TreeNode("Allocation info"))
 			{
@@ -139,8 +142,11 @@ void MainPane::Draw()
 		{
 			spriteId = -1;
 			ImGui::Text("This pattern is empty.");
+			render->DontDraw();
 		}
 	}
+	else
+		render->DontDraw();
 
 
 
@@ -150,4 +156,5 @@ void MainPane::Draw()
 	ImGui::End();
 
 	render->SwitchImage(spriteId);
+	
 }

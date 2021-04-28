@@ -3,10 +3,7 @@
 
 #include <string>
 #include <vector>
-
-struct Hitbox {
-	short x1, y1, x2, y2;
-};
+#include "hitbox.h"
 
 struct Frame_AF {
 	// rendering data
@@ -89,6 +86,7 @@ struct Frame {
 	Frame_IF	*IF[8];
 
 	Hitbox	*hitboxes[33];
+	int nHitbox;
 };
 
 struct Sequence {

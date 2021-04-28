@@ -19,8 +19,8 @@ mainPane(&render)
 	
 	WarmStyle();
 
-	framedata.load("test/p_arc.HA6");
-	cg.load("test/p_arc.cg");
+	framedata.load("test/ries.HA6");
+	cg.load("test/ries.cg");
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
 	render.scale = 2;
