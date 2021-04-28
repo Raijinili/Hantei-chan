@@ -45,7 +45,7 @@ struct CG_Image {
 class CG {
 protected:
 	unsigned int *palette;
-	bool				m_loaded;
+	
 
 	char				*m_data;
 	unsigned int			m_data_size;
@@ -89,6 +89,7 @@ protected:
 
 	const CG_Image	*get_image(unsigned int n);
 public:
+	bool m_loaded;
 	bool			load(const char *name);
 
 	void			free();

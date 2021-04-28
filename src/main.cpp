@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_win32.h>
 #include <windows.h>
+#include <commdlg.h>
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -16,10 +17,39 @@
 
 ImVec2 clientRect;
 
-static HWND mainWindowHandle;
+HWND mainWindowHandle;
 static ContextGl *context;
 static bool dragWindow;
 static POINT mousePos;
+
+std::string FileDialog()
+{
+	OPENFILENAMEA ofn;       // common dialog box structure
+	char szFile[260];       // buffer for file name
+	HANDLE hf;              // file handle
+
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = mainWindowHandle;
+	ofn.lpstrFile = szFile;
+	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
+	// use the contents of szFile to initialize itself.
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = ".";
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	// Display the Open dialog box. 
+
+	if (GetOpenFileNameA(&ofn)==TRUE)
+		return ofn.lpstrFile;
+	return {};
+}
 
 void LoadJapaneseFonts(ImGuiIO& io)
 {

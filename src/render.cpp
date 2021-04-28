@@ -126,20 +126,27 @@ void Render::SetCg(CG *cg_)
 
 void Render::SwitchImage(int id)
 {
-	if(id != curImageId)
+	if(id != curImageId && cg->m_loaded)
 	{
+		curImageId = id;
 		texture.Unapply();
 
 		if(id>=0)
 		{
-			texture.Load(cg->draw_texture(id, false, false));
+			ImageData *image = cg->draw_texture(id, false, false);
+			if(!image)
+			{
+				return;
+			}
+
+			texture.Load(image);
 			texture.Apply();
 			
 			AdjustImageQuad(texture.image->offsetX, texture.image->offsetY, texture.image->width, texture.image->height);
 			vSprite.UpdateBuffer(0, imageVertex);
 			texture.Unload();
 		}
-		curImageId = id;
+		
 	}
 }
 

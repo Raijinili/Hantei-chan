@@ -6,21 +6,22 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_win32.h>
 #include <windows.h>
+
 #include <glad/glad.h>
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 bool show_demo_window = false;
 
+
 MainFrame::MainFrame(ContextGl *context_):
 context(context_),
 mainPane(&render)
 {
-	
 	WarmStyle();
 
-	framedata.load("test/ries.HA6");
-	cg.load("test/ries.cg");
+/* 	framedata.load("test/ries.HA6");
+	cg.load("test/ries.cg"); */
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
 	render.scale = 2;
@@ -45,9 +46,12 @@ void MainFrame::DrawBack()
 
 void MainFrame::DrawUi()
 {
+	
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+	ImGuiID errorPopupId = ImGui::GetID("Loading Error");
+	
 
 	//Fullscreen docker to provide the layout for the panes
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -74,6 +78,34 @@ void MainFrame::DrawUi()
 			//ImGui::Separator();
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("Load HA6"))
+				{
+					std::string &&file = FileDialog();
+					if(!file.empty())
+					{
+						if(!framedata.load(file.c_str()))
+						{
+							ImGui::OpenPopup(errorPopupId);
+						}
+						else
+							mainPane.RegenerateNames();
+					}
+				}
+
+				if (ImGui::MenuItem("Load CG")) 
+				{
+					std::string &&file = FileDialog();
+					if(!file.empty())
+					{
+						if(!cg.load(file.c_str()))
+						{
+							ImGui::OpenPopup(errorPopupId);
+							render.SwitchImage(-1);
+						}
+					}
+				}
+
+
 				if (ImGui::MenuItem("Exit")) PostQuitMessage(0);
 				ImGui::EndMenu();
 			}
@@ -131,11 +163,22 @@ void MainFrame::DrawUi()
 		); 
 	ImGui::End();
 
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	if (ImGui::BeginPopupModal("Loading Error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("There was a problem loading the file.\n"
+			"The file couldn't be accessed or it's not a valid file.\n\n");
+		ImGui::Separator();
+		if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		ImGui::EndPopup();
+	}
+
 	mainPane.Draw(); 
 
 
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
+	
 
 	// Rendering
 	ImGui::Render();

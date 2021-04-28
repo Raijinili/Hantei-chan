@@ -12,6 +12,7 @@ public:
 	MainPane(Render* render);
 	void Draw();
 	void SetFrameData(FrameData *frameData);
+	void RegenerateNames();
 
 private:
 	Render *render;
@@ -21,6 +22,8 @@ private:
 	int spriteId;
 
 	std::string *decoratedNames;
+
+	
 };
 
 #endif /* MAINPANE_H_GUARD */

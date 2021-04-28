@@ -350,7 +350,7 @@ void CG::build_image_table() {
 
 bool CG::load(const char *name) {
 	if (m_loaded) {
-		return 0;
+		free();
 	}
 	
 	char *data;

@@ -23,17 +23,10 @@ decoratedNames(nullptr),
 render(render_)
 {
 	
-} 
+}
 
-void MainPane::SetFrameData(FrameData *frameData_)
+void MainPane::RegenerateNames()
 {
-	if(frameData_)
-		currentPattern = 0;
-	else
-		currentPattern = -1;
-
-	frameData = frameData_;
-
 	delete[] decoratedNames;
 	
 	if(frameData)
@@ -50,12 +43,24 @@ void MainPane::SetFrameData(FrameData *frameData_)
 		decoratedNames = nullptr;
 }
 
+void MainPane::SetFrameData(FrameData *frameData_)
+{
+	if(frameData_)
+		currentPattern = 0;
+	else
+		currentPattern = -1;
+
+	frameData = frameData_;
+
+	RegenerateNames();
+}
+
 
 void MainPane::Draw()
 {	
 	
 	ImGui::Begin("Left Pane",0 , ImGuiWindowFlags_NoMove );
-	if(frameData)
+	if(frameData->m_loaded)
 	{
 		if (ImGui::BeginCombo("Pattern", decoratedNames[currentPattern].c_str(), ImGuiComboFlags_HeightLargest))
 		{

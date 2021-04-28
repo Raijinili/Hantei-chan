@@ -110,9 +110,10 @@ class FrameData {
 private:
 	unsigned int	m_nsequences;
 
-	bool		m_loaded;
+	
 public:
 
+	bool		m_loaded;
 	Sequence	*m_sequences;
 	bool		load(const char *filename);
 
