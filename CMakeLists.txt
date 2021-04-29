@@ -32,3 +32,8 @@ target_compile_definitions(${EXE} PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN)
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(${EXE} PRIVATE imgui glad OpenGL::GL glm)
+
+if(MINGW)
+	message(status "With -municode")
+	target_link_options(${EXE} PRIVATE -municode)
+endif()
