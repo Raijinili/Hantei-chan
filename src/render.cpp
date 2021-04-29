@@ -170,6 +170,11 @@ void Render::AdjustImageQuad(int x, int y, int w, int h)
 
 void Render::GenerateHitboxVertices(Hitbox **hitboxes, int size)
 {
+	if(size <= 0)
+	{
+		quadsToDraw = 0;
+		return;
+	}
 	static Hitbox **lastHitbox = 0;
 	static int lastSize = 0;
 

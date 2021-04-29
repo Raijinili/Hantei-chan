@@ -1,4 +1,4 @@
-Hantei6 GUI editor for Melty Blood.
+Hantei6 GUI editor for Melty Blood. This program only for windows.
 
 -----------------------
 ## How to build ##
@@ -16,4 +16,3 @@ build\ha6gui.exe
 ```
 
 And that's it!
-This program only for windows.

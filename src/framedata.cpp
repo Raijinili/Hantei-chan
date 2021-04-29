@@ -442,15 +442,19 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 		
 		if (!memcmp(buf, "PTCN", 4)) {
 			memcpy(seq->ptcn, data, 5);
+			seq->hasPtcn = true;
 			data = (unsigned int *)(((unsigned char *)data)+5);
 		} else if (!memcmp(buf, "PSTS", 4)) {
 			seq->psts = *data;
+			seq->hasPsts = true;
 			++data;
 		} else if (!memcmp(buf, "PLVL", 4)) {
 			seq->level = *data;
+			seq->hasLevel = true;
 			++data;
 		} else if (!memcmp(buf, "PFLG", 4)) {
 			seq->flag = *data;
+			seq->hasFlag = true;
 			++data;
 		} else if (!memcmp(buf, "PDST", 4)) {
 			// PDST is only used on G_CHAOS
@@ -507,6 +511,9 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				seq->AS.resize(data[7]);
 
 				nframes = data[1];
+
+				//The eight integer seems to also be the frame count.
+				assert(data[8] == data[1]); //Just to make sure.
 
 				seq->initialized = 1;
 			}
