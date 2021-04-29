@@ -104,7 +104,7 @@ void Render::Draw()
 
 	sSimple.Use();
 	vGeometry.Bind();
-	glUniform1f(lAlphaS, 1.f);
+	//glUniform1f(lAlphaS, 0.6f);
 	vGeometry.DrawQuads(GL_LINE_LOOP, quadsToDraw);
 	glUniform1f(lAlphaS, 0.2f);
 	vGeometry.DrawQuads(GL_TRIANGLE_FAN, quadsToDraw);

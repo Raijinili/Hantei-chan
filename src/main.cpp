@@ -132,7 +132,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 			io.IniFilename = nullptr;
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 			LoadJapaneseFonts(io);
 			ImGui_ImplWin32_Init(hWnd);
 			ImGui_ImplOpenGL3_Init("#version 120");
@@ -150,6 +150,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			mf->UpdateBackProj(clientRect.x, clientRect.y);
 		}
 		return 0;
+	case WM_KEYDOWN:
+		if(!ImGui::GetIO().WantCaptureKeyboard)
+		{
+			if(mf->HandleKeys(wParam));
+				return 0;
+		}
 	case WM_LBUTTONDOWN:
 		if(!ImGui::GetIO().WantCaptureMouse)
 		{

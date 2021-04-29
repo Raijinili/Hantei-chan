@@ -19,8 +19,8 @@ mainPane(&render)
 {
 	WarmStyle();
 
-	framedata.load("test/ries.HA6");
-	cg.load("test/ries.cg");
+	framedata.load("test/s_akiha.HA6");
+	cg.load("test/s_akiha.cg");
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
 	render.scale = 2;
@@ -270,4 +270,18 @@ void MainFrame::HandleMouseDrag(int x_, int y_)
 {
 	x += x_;
 	y += y_;
+}
+
+bool MainFrame::HandleKeys(uint64_t vkey)
+{
+	switch (vkey)
+	{
+	case VK_UP:
+		mainPane.AdvancePattern(-1);
+		return true;
+	case VK_DOWN:
+		mainPane.AdvancePattern(1);
+		return true;
+	}
+	return false;
 }

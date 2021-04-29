@@ -10,6 +10,7 @@
 #include <iomanip>
 
 Sequence::Sequence():
+ptcn{}, psts(0), level(0), flag(0),
 empty(true),
 initialized(false)
 {}
@@ -440,12 +441,16 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 		++data;
 		
 		if (!memcmp(buf, "PTCN", 4)) {
+			memcpy(seq->ptcn, data, 5);
 			data = (unsigned int *)(((unsigned char *)data)+5);
 		} else if (!memcmp(buf, "PSTS", 4)) {
+			seq->psts = *data;
 			++data;
 		} else if (!memcmp(buf, "PLVL", 4)) {
+			seq->level = *data;
 			++data;
 		} else if (!memcmp(buf, "PFLG", 4)) {
+			seq->flag = *data;
 			++data;
 		} else if (!memcmp(buf, "PDST", 4)) {
 			// PDST is only used on G_CHAOS
@@ -467,7 +472,7 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			data += 1 + ((len+3)/4);
 		} else if (!memcmp(buf, "PTIT", 4)) {
 			//TODO: verify and remove
-			assert("PTIT");
+			assert(0 && "PTIT");
 			// fixed-length sequence title
 			char str[33];
 			memcpy(str, data, 32);
@@ -515,11 +520,12 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			}
 			else
 			{
-				assert("Actual frame number and PDS2 don't match");
+				assert(0 && "Actual frame number and PDS2 don't match");
 			}
 		} else if (!memcmp(buf, "PEND", 4)) {
 			break;
-		}
+		} else
+			assert(0);
 	}
 	
 	if(seq->initialized)
@@ -648,20 +654,18 @@ std::string FrameData::GetDecoratedName(int n)
 		std::stringstream ss;
 		ss.flags(std::ios_base::right);
 		
-		ss << std::setfill('0') << std::setw(3) << n;
+		ss << std::setfill('0') << std::setw(3) << n << " ";
 		if(!m_sequences[n].empty)
 		{
-			ss << " ";
-			if(m_sequences[n].name.empty())
+			bool noFrames = m_sequences[n].frames.empty();
+			if(noFrames)
+				ss << u8"〇 ";
+
+			ss << m_sequences[n].name;
+			if(m_sequences[n].name.empty() && !noFrames)
 			{
-				if(m_sequences[n].frames.empty())
-					ss << u8"〇";
-				else
 					ss << u8"Untitled";
 			}
-			else
-				ss << m_sequences[n].name;
-			
 		}
 
 		return ss.str();

@@ -93,6 +93,11 @@ struct Sequence {
 	// sequence property data
 	std::string	name;
 
+	char ptcn[5];
+	int psts;
+	int level;
+	int flag;
+
 	bool empty;
 	bool initialized;
 

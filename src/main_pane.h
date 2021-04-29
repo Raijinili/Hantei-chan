@@ -13,6 +13,8 @@ public:
 	void Draw();
 	void SetFrameData(FrameData *frameData);
 	void RegenerateNames();
+	void AdvancePattern(int dir);
+	void ForceUpdate();
 
 private:
 	Render *render;
