@@ -37,23 +37,17 @@ inline void PatternDisplay(Sequence *seq)
 	ImGui::InputScalarN("##PTCN4", ImGuiDataType_S8, &seq->ptcn[3], 1, NULL, NULL, "%d");
 	ImGui::SetNextItemWidth(ptcnSpacing); ImGui::SameLine();
 	ImGui::InputScalarN("PTCN", ImGuiDataType_S8, &seq->ptcn[4], 1, NULL, NULL, "%d");
-	ImGui::SameLine();
-	ImGui::Checkbox("##BPTCN", &seq->hasPtcn);
+	///ImGui::SameLine();
+	//ImGui::Checkbox("##BPTCN", &seq->hasPtcn);
 	
 	ImGui::SetNextItemWidth(40.f);
 	ImGui::InputInt("PSTS", &seq->psts, 0, 0);
-	ImGui::SameLine();
-	ImGui::Checkbox("##BPSTS", &seq->hasPsts);
 
 	ImGui::SetNextItemWidth(40.f);
 	ImGui::InputInt("Level", &seq->level, 0, 0);
-	ImGui::SameLine();
-	ImGui::Checkbox("##BPLVL", &seq->hasLevel);
 
 	ImGui::SetNextItemWidth(80.f);
 	ImGui::InputInt("Flag (PFLG)", &seq->flag, 0, 0);
-	ImGui::SameLine();
-	ImGui::Checkbox("##BPFLG", &seq->hasFlag);
 
 	ImGui::EndChild();
 }

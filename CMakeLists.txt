@@ -19,7 +19,7 @@ add_executable(${EXE} WIN32
 	src/vao.cpp
 	src/shader.cpp
 	src/texture.cpp
-	
+	src/filedialog.cpp
 	src/framedata.cpp
 	src/cg.cpp
 	src/misc.cpp

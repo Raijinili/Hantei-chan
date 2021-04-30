@@ -184,9 +184,9 @@ void Render::GenerateHitboxVertices(Hitbox **hitboxes, int size)
 	constexpr float greenColor[] 		{0, 1, 0, 2};
 	constexpr float redColor[] 			{1, 0, 0, 3};
 	constexpr float clashColor[]		{1, 1, 0, 4};
-	constexpr float shieldColor[] 		{0, 0, 1, 5};
+	constexpr float shieldColor[] 		{0, 0, 1, 5}; //Not only for shield
 	constexpr float purple[] 			{1, 0, 1, 6}; //特別
-	constexpr float projectileColor[] 	{0, 1, 1, 7}; //飛び道具？
+	constexpr float projectileColor[] 	{0, 1, 1, 7}; //飛び道具？ Warc uses them.
 
 	constexpr int tX[] = {0,1,1,0};
 	constexpr int tY[] = {0,0,1,1};

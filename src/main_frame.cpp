@@ -1,6 +1,8 @@
 #include "main_frame.h"
 
 #include "main.h"
+#include "filedialog.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_impl_opengl3.h>
@@ -19,8 +21,8 @@ mainPane(&render)
 {
 	WarmStyle();
 
-	framedata.load("test/s_akiha.HA6");
-	cg.load("test/s_akiha.cg");
+	framedata.load("test/akaakiha.HA6");
+	cg.load("test/akaakiha.cg");
 	mainPane.SetFrameData(&framedata);
 	render.SetCg(&cg);
 	render.scale = 2;
@@ -84,7 +86,7 @@ void MainFrame::DrawUi()
 			{
 				if (ImGui::MenuItem("Load HA6"))
 				{
-					std::string &&file = FileDialog();
+					std::string &&file = FileDialog(fileType::HA6);
 					if(!file.empty())
 					{
 						if(!framedata.load(file.c_str()))
@@ -98,7 +100,7 @@ void MainFrame::DrawUi()
 
 				if (ImGui::MenuItem("Load CG")) 
 				{
-					std::string &&file = FileDialog();
+					std::string &&file = FileDialog(fileType::CG);
 					if(!file.empty())
 					{
 						if(!cg.load(file.c_str()))

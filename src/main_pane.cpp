@@ -1,5 +1,6 @@
 #include "main_pane.h"
 #include "pattern_disp.h"
+#include "frame_disp.h"
 #include <imgui.h>	
 
 
@@ -108,33 +109,23 @@ void MainPane::Draw()
 				ImGui::Text("%d/%d", currFrame+1, nframes+1);
 
 				Frame &frame = seq->frames[currFrame];
-				if(frame.AF.active)
+				if (ImGui::TreeNode("Frame data"))
 				{
-					spriteId = frame.AF.frame;
-					render->offsetX = (frame.AF.offset_x-128)*2;
-					render->offsetY = (frame.AF.offset_y-224)*2;
+					FrameDisplay(&frame);
+					ImGui::TreePop();
+					ImGui::Separator();
 				}
-				else
-				{
-					spriteId = -1;	
-				}
-
-				render->GenerateHitboxVertices(frame.hitboxes, frame.nHitbox);
 			}
 			else
 			{
-				spriteId = -1;
 				ImGui::Text("This pattern has no frames.");
-				render->DontDraw();
 			}
 
 
 		}
 		else
 		{
-			spriteId = -1;
 			ImGui::Text("This pattern is empty.");
-			render->DontDraw();
 		}
 	}
 	else
@@ -147,8 +138,7 @@ void MainPane::Draw()
 
 	ImGui::End();
 
-	render->SwitchImage(spriteId);
-	
+	ForceUpdate();
 }
 
 void MainPane::ForceUpdate()
@@ -160,7 +150,7 @@ void MainPane::ForceUpdate()
 		seq->frames.size() > 0)
 	{
 		auto &frame =  seq->frames[currFrame];
-		spriteId = frame.AF.frame;
+		spriteId = frame.AF.spriteId;
 		render->GenerateHitboxVertices(frame.hitboxes, frame.nHitbox);
 		render->offsetX = (frame.AF.offset_x-128)*2;
 		render->offsetY = (frame.AF.offset_y-224)*2;

@@ -9,31 +9,44 @@ struct Frame_AF {
 	// rendering data
 	bool		active;
 
-	int		frame;
-	int		frame_unk;
+	int		spriteId;
+	int		usePat;
 
 	int		offset_y;
 	int		offset_x;
 
 	int		duration;
-	int		AFF;
+
+	/* Animation flag
+	Default: End
+	1: Next
+	2: Jump to frame
+	*/
+	int		aniFlag;
+
 
 	int		blend_mode;
 
-	unsigned char	alpha;
-	unsigned char	red;
-	unsigned char	green;
-	unsigned char	blue;
+	float	rgba[4]{1,1,1,1};
 
-	float		z_rotation;
-	float		y_rotation;
-	float		x_rotation;
+	float rotation[3]{}; //XYZ
 
 	bool		has_zoom;
-	float		zoom_x;
-	float		zoom_y;
+	float		scale[2]{1,1};//xy
 
-	int		AFJP;
+	//Depends on aniflag.
+	//If (0)end, it jumps to the number of the sequence
+	//If (2)jump, it jumps to the number of the frame of the seq.
+	//It seems to do nothing if the aniflag is 1(next).
+	int jump;
+
+	
+	int landJump; //Jumps to this frame if landing.
+	int interpolation; //Appears and the end of some effects. Seems to be an on/off bit.
+	int priority; // Default is 0. Used in throws and dodge.
+	int loopCount; //Times to loop, it's the frame just before the loop.
+	int loopEnd; //The frame number is not part of the loop.
+	
 };
 
 struct Frame_AS {
@@ -79,13 +92,13 @@ struct Frame_IF {
 struct Frame {
 	Frame_AF	AF;
 
-	Frame_AS	*AS;
-	Frame_AT	*AT;
+	Frame_AS	*AS = nullptr;
+	Frame_AT	*AT = nullptr;
 
-	Frame_EF	*EF[8];
-	Frame_IF	*IF[8];
+	Frame_EF	*EF[8]{};
+	Frame_IF	*IF[8]{};
 
-	Hitbox	*hitboxes[33];
+	Hitbox	*hitboxes[33]{};
 	int nHitbox;
 };
 
@@ -93,10 +106,10 @@ struct Sequence {
 	// sequence property data
 	std::string	name;
 
-	char ptcn[5]; bool hasPtcn = false;
-	int psts; bool hasPsts = false;
-	int level; bool hasLevel = false;
-	int flag; bool hasFlag= false;
+	char ptcn[5];
+	int psts;
+	int level;
+	int flag;
 
 	bool empty;
 	bool initialized;

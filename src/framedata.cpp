@@ -208,24 +208,15 @@ static unsigned int *fd_frame_IF_load(unsigned int *data, const unsigned int *da
 static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *data_end,
 				Frame *frame) {
 	frame->AF.active = 1;
-	frame->AF.frame = -1;
-	frame->AF.frame_unk = -1;
+	frame->AF.spriteId = -1;
+	frame->AF.usePat = 0;
 	frame->AF.offset_x = 0;
 	frame->AF.offset_y = 8;
 	frame->AF.duration = 1;
-	frame->AF.AFF = -1;
+	//frame->AF.aniFlag = -1;
 	frame->AF.blend_mode = 0;
-	frame->AF.alpha = 255;
-	frame->AF.red = 255;
-	frame->AF.green = 255;
-	frame->AF.blue = 255;
-	frame->AF.z_rotation = 0.0;
-	frame->AF.x_rotation = 0.0;
-	frame->AF.y_rotation = 0.0;
 	frame->AF.has_zoom = 0;
-	frame->AF.zoom_x = 1.0;
-	frame->AF.zoom_y = 1.0;
-	frame->AF.AFJP = -1;
+	frame->AF.jump = -1;
 	
 	while (data < data_end) {
 		unsigned int *buf = data;
@@ -233,8 +224,9 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 		
 		if (!memcmp(buf, "AFGP", 4)) {
 			int *dt = (int *)data;
-			frame->AF.frame = dt[1];
-			frame->AF.frame_unk = dt[0];
+			frame->AF.spriteId = dt[1];
+			frame->AF.usePat = dt[0];
+			assert(dt[0] == 0 || dt[0] == 1);
 			data += 2;
 		} else if (!memcmp(buf, "AFOF", 4)) {
 			int *dt = (int *)data;
@@ -266,40 +258,55 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 		} else if (!memcmp(buf, "AFF", 3)) {
 			char t = ((char *)buf)[3];
 			if (t >= '0' && t <= '9') {
-				frame->AF.AFF = t - '0';
+				frame->AF.aniFlag = t - '0';
 			} else if (t == 'X') {
-				frame->AF.AFF = data[0];
+				frame->AF.aniFlag = data[0];
 				++data;
 			}
 		} else if (!memcmp(buf, "AFAL", 4)) {
 			frame->AF.blend_mode = data[0];
-			frame->AF.alpha = data[1];
+			frame->AF.rgba[3] = ((float)data[1])/255.f;
 			data += 2;
 		} else if (!memcmp(buf, "AFRG", 4)) {
-			frame->AF.red = data[0];
-			frame->AF.green = data[1];
-			frame->AF.blue = data[2];
+			frame->AF.rgba[0] = ((float)data[0])/255.f;
+			frame->AF.rgba[1] = ((float)data[1])/255.f;
+			frame->AF.rgba[2] = ((float)data[2])/255.f;
 			data += 3;
 		} else if (!memcmp(buf, "AFAZ", 4)) {
-			frame->AF.z_rotation = *(float *)data;
+			frame->AF.rotation[2] = *(float *)data;
 			
 			++data;
 		} else if (!memcmp(buf, "AFAY", 4)) {
-			frame->AF.y_rotation = *(float *)data;
+			frame->AF.rotation[1] = *(float *)data;
 			
 			++data;
 		} else if (!memcmp(buf, "AFAX", 4)) {
-			frame->AF.x_rotation = *(float *)data;
+			frame->AF.rotation[0] = *(float *)data;
 			
 			++data;
 		} else if (!memcmp(buf, "AFZM", 4)) {
 			frame->AF.has_zoom = 1;
-			frame->AF.zoom_x = ((float *)data)[0];
-			frame->AF.zoom_y = ((float *)data)[1];
+			frame->AF.scale[0] = ((float *)data)[0];
+			frame->AF.scale[1] = ((float *)data)[1];
 			
 			data += 2;
 		} else if (!memcmp(buf, "AFJP", 4)) {
-			frame->AF.AFJP = data[0];
+			frame->AF.jump = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFHK", 4)) {
+			frame->AF.interpolation = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFPR", 4)) {
+			frame->AF.priority = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFCT", 4)) {
+			frame->AF.loopCount = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFLP", 4)) {
+			frame->AF.loopEnd = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFJC", 4)) {
+			frame->AF.landJump = data[0];
 			++data;
 		} else if (!memcmp(buf, "AFED", 4)) {
 			break;
@@ -308,12 +315,6 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 		// unhandled:
 		// AFTN(2)
 		// AFRT(1)
-		// AFHK(1)
-		// AFPR(1)
-		// AFCT(1)
-		// AFJP(1)
-		// AFLP(1)
-		// AFJC(1)
 	}
 	
 	return data;
@@ -321,7 +322,6 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 
 static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_end,
 				Frame *frame, TempInfo *info) {
-	memset(frame, 0, sizeof(Frame));
 	int boxesCount = 0;
 	while (data < data_end) {
 		unsigned int *buf = data;
@@ -408,7 +408,19 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 				
 				data = fd_frame_IF_load(data, data_end, frame->IF[n]);
 			}
-		} else if (!memcmp(buf, "FEND", 4)) {
+		}/*  else if (!memcmp(buf, "FSNA", 4)) {
+			unsigned int value = data[0];
+			++data;
+		} else if (!memcmp(buf, "FSNH", 4)) {
+			unsigned int value = data[0];
+			++data;
+		} else if (!memcmp(buf, "FSNE", 4)) {
+			unsigned int value = data[0];
+			++data;
+		} else if (!memcmp(buf, "FSNI", 4)) {
+			unsigned int value = data[0];
+			++data;
+		} */ else if (!memcmp(buf, "FEND", 4)) {
 			break;
 		}
 		
@@ -426,6 +438,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 
 static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *data_end,
 				Sequence *seq) {
+
 	TempInfo temp_info;
 	unsigned int frame_it = 0, nframes = 0;
 	
@@ -441,20 +454,33 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 		++data;
 		
 		if (!memcmp(buf, "PTCN", 4)) {
+			//Seems to always be 1? No idea. Cancel related is my guess.
 			memcpy(seq->ptcn, data, 5);
-			seq->hasPtcn = true;
+			assert(seq->ptcn[0] == 1 && 
+				seq->ptcn[1] == 0 &&
+				seq->ptcn[2] == 0 &&
+				seq->ptcn[3] == 0 &&
+				seq->ptcn[4] == 0);
 			data = (unsigned int *)(((unsigned char *)data)+5);
 		} else if (!memcmp(buf, "PSTS", 4)) {
+			//I believe it appears in hantei4 as 技情報. Has to do with the kind of move?
+			//Doesn't appear = 0, Movement
+			//1 Regular attacks
+			//2 Throw. Only Arc (and b_arc) uses it?
+			//3 必殺技? FRies 236C uses it
+			//5 他 Projectiles, but not effects.
 			seq->psts = *data;
-			seq->hasPsts = true;
+			assert(*data == 1 || *data == 5 || *data == 3 || *data == 2); //known values
 			++data;
 		} else if (!memcmp(buf, "PLVL", 4)) {
+			//Determines rebeat
 			seq->level = *data;
-			seq->hasLevel = true;
+			assert(*data > 0);
 			++data;
 		} else if (!memcmp(buf, "PFLG", 4)) {
+			//Unknown. Always 1?
 			seq->flag = *data;
-			seq->hasFlag = true;
+			assert(*data == 1);
 			++data;
 		} else if (!memcmp(buf, "PDST", 4)) {
 			// PDST is only used on G_CHAOS
@@ -464,15 +490,14 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 		} else if (!memcmp(buf, "PTT2", 4)) {
 			// variable-length sequence title
 			unsigned int len = data[0];
-			if (len < 64) {
-				char str[65];
-				memcpy(str, data+1, len);
-				str[len] = '\0';
-				
-				seq->name = str;
-				seq->name = sj2utf8(seq->name);
-			}
+			assert (len < 64);
+			char str[65];
+			memcpy(str, data+1, len);
+			str[len] = '\0';
 			
+			seq->name = str;
+			seq->name = sj2utf8(seq->name);
+
 			data += 1 + ((len+3)/4);
 		} else if (!memcmp(buf, "PTIT", 4)) {
 			//TODO: verify and remove
@@ -662,8 +687,13 @@ std::string FrameData::GetDecoratedName(int n)
 		ss.flags(std::ios_base::right);
 		
 		ss << std::setfill('0') << std::setw(3) << n << " ";
+		
 		if(!m_sequences[n].empty)
 		{
+			//Debug
+			if(m_sequences[n].psts > 1 && m_sequences[n].psts !=5)
+				ss << " (!) ";
+
 			bool noFrames = m_sequences[n].frames.empty();
 			if(noFrames)
 				ss << u8"〇 ";
@@ -674,7 +704,7 @@ std::string FrameData::GetDecoratedName(int n)
 					ss << u8"Untitled";
 			}
 		}
-
+		
 		return ss.str();
 }
 
