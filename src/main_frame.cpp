@@ -58,10 +58,6 @@ void MainFrame::DrawBack()
 
 void MainFrame::DrawUi()
 {
-	
-	/* ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame(); */
 	ImGuiID errorPopupId = ImGui::GetID("Loading Error");
 	
 
@@ -111,9 +107,9 @@ void MainFrame::DrawUi()
 					{
 						if(!cg.load(file.c_str()))
 						{
-							ImGui::OpenPopup(errorPopupId);
-							render.SwitchImage(-1);
+							ImGui::OpenPopup(errorPopupId);	
 						}
+						render.SwitchImage(-1);
 					}
 				}
 
@@ -191,11 +187,6 @@ void MainFrame::DrawUi()
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 	
-
-	// Rendering
-/* 	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
- */
 }
 
 void MainFrame::WarmStyle()
@@ -288,6 +279,12 @@ bool MainFrame::HandleKeys(uint64_t vkey)
 		return true;
 	case VK_DOWN:
 		mainPane.AdvancePattern(1);
+		return true;
+	case VK_LEFT:
+		mainPane.AdvanceFrame(-1);
+		return true;
+	case VK_RIGHT:
+		mainPane.AdvanceFrame(+1);
 		return true;
 	}
 	return false;

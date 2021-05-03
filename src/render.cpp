@@ -11,12 +11,13 @@
 
 #include "hitbox.h"
 
+constexpr int maxBoxes = 33;
+
 
 Render::Render():
 cg(nullptr),
 vSprite(Vao::F2F2, GL_DYNAMIC_DRAW),
 vGeometry(Vao::F3F3, GL_STREAM_DRAW),
-curImageId(-1),
 imageVertex{
 	256, 256, 	0, 0,
 	512, 256,  	1, 0, 
@@ -26,9 +27,12 @@ imageVertex{
 	256, 512,  	0, 1,
 	256, 256,  	0, 0,
 },
+colorRgba{1,1,1,1},
+curImageId(-1),
 quadsToDraw(0),
 x(0), offsetX(0),
-y(0), offsetY(0)
+y(0), offsetY(0),
+blendingMode(normal)
 {
 	sSimple.BindAttrib("Position", 0);
 	sSimple.BindAttrib("Color", 1);
@@ -37,6 +41,7 @@ y(0), offsetY(0)
 
 	sTextured.BindAttrib("Position", 0);
 	sTextured.BindAttrib("UV", 1);
+	sTextured.BindAttrib("Color", 2);
 	sTextured.LoadShader("src/textured.vert", "src/textured.frag");
 	
 	lAlphaS = sSimple.GetLoc("Alpha");
@@ -53,9 +58,10 @@ y(0), offsetY(0)
 		0, 10000, -1,	1,1,1,
 		0, -10000, -1,	1,1,1,
 	};
+	
 
 	geoParts[LINES] = vGeometry.Prepare(sizeof(lines), lines);
-	geoParts[BOXES] = vGeometry.Prepare(sizeof(float)*6*4*128, nullptr);
+	geoParts[BOXES] = vGeometry.Prepare(sizeof(float)*6*4*maxBoxes, nullptr);
 	vGeometry.Load();
 	vGeometry.InitQuads(geoParts[BOXES]);
 
@@ -94,14 +100,19 @@ void Render::Draw()
 		)
 	);
  	sTextured.Use();
+	
 	SetMatrix(lProjectionT);
 	if(texture.isApplied)
 	{
+		SetBlendingMode();
+		glDisableVertexAttribArray(2);
+		glVertexAttrib4fv(2, colorRgba);
 		vSprite.Bind();
 		vSprite.Draw(0);
 	}
-
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+	
 	sSimple.Use();
 	vGeometry.Bind();
 	//glUniform1f(lAlphaS, 0.6f);
@@ -196,7 +207,7 @@ void Render::GenerateHitboxVertices(Hitbox **hitboxes, int size)
 		clientQuads.resize(floats);
 	
 	int dataI = 0;
-	for(int i = 0; i < 33; i++)
+	for(int i = 0; i < maxBoxes; i++)
 	{
 		if(!hitboxes[i])
 			continue;
@@ -236,4 +247,38 @@ void Render::GenerateHitboxVertices(Hitbox **hitboxes, int size)
 void Render::DontDraw()
 {
 	quadsToDraw = 0;
+}
+
+void Render::SetImageColor(float *rgba)
+{
+	if(rgba)
+	{
+		for(int i = 0; i < 4; i++)
+			colorRgba[i] = rgba[i];
+	}
+	else
+	{
+		for(int i = 0; i < 4; i++)
+			colorRgba[i] = 1.f;
+	}
+}
+
+void Render::SetBlendingMode()
+{
+	switch (blendingMode)
+	{
+	default:
+	case normal:
+		//glBlendEquation(GL_FUNC_ADD);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case additive:
+		//glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		break;
+	case substractive:
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
+		break;
+	}
 }

@@ -10,9 +10,12 @@ Assuming you're using ninja:
 git clone --recursive https://github.com/meifuku/HA6-gui.git
 cd HA6-gui
 mkdir build
-cmake -S. -Bbuild -GNinja
+cmake -S. -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 build\ha6gui.exe
 ```
 
 And that's it!
+
+The executable currently needs the .vert and .frag shader files located in /src to run
+They will be baked into the file later on.

@@ -32,13 +32,15 @@ private:
 	Shader sSimple;
 	Shader sTextured;
 	Texture texture;
+	float colorRgba[4];
+
 	int curImageId;
 	
 
 	void AdjustImageQuad(int x, int y, int w, int h);
-
 	void SetModelView(glm::mat4&& view);
 	void SetMatrix(int location);
+	void SetBlendingMode();
 
 public:
 	int x, offsetX;
@@ -53,6 +55,15 @@ public:
 	void SetCg(CG *cg);
 	void SwitchImage(int id);
 	void DontDraw();
+	void SetImageColor(float *rgbaArr);
+
+	enum blendType{
+		normal,
+		additive,
+		substractive
+	};
+
+	blendType blendingMode;
 };
 
 #endif /* RENDER_H_GUARD */

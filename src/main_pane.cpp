@@ -144,9 +144,7 @@ void MainPane::Draw()
 void MainPane::ForceUpdate()
 {
 	Sequence *seq;
-	Frame *frame;
-	if(	frameData->m_loaded &&
-		(seq = frameData->get_sequence(currentPattern)) &&
+	if((seq = frameData->get_sequence(currentPattern)) &&
 		seq->frames.size() > 0)
 	{
 		auto &frame =  seq->frames[currFrame];
@@ -154,6 +152,19 @@ void MainPane::ForceUpdate()
 		render->GenerateHitboxVertices(frame.hitboxes, frame.nHitbox);
 		render->offsetX = (frame.AF.offset_x-128)*2;
 		render->offsetY = (frame.AF.offset_y-224)*2;
+		render->SetImageColor(frame.AF.rgba);
+		switch (frame.AF.blend_mode)
+		{
+		case 2:
+			render->blendingMode = Render::additive;
+			break;
+		case 3:
+			render->blendingMode = Render::substractive;
+			break;
+		default:
+			render->blendingMode = Render::normal;
+			break;
+		}
 	}
 	else
 	{
@@ -172,6 +183,14 @@ void MainPane::AdvancePattern(int dir)
 	else if(currentPattern >= frameData->get_sequence_count())
 		currentPattern = frameData->get_sequence_count()-1;
 	currFrame = 0;
+}
 
-	//ForceUpdate();
+void MainPane::AdvanceFrame(int dir)
+{
+	auto seq = frameData->get_sequence(currentPattern);
+	currFrame += dir;
+	if(currFrame < 0)
+		currFrame = 0;
+	else if(seq && currFrame >= seq->frames.size())
+		currFrame = seq->frames.size()-1;
 }

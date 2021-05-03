@@ -18,7 +18,6 @@ public:
 	void UpdateBackProj(float x, float y);
 	void HandleMouseDrag(int x, int y);
 	bool HandleKeys(uint64_t vkey);
-	
 
 private:
 	ContextGl *context;

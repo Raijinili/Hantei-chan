@@ -216,7 +216,7 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 	//frame->AF.aniFlag = -1;
 	frame->AF.blend_mode = 0;
 	frame->AF.has_zoom = 0;
-	frame->AF.jump = -1;
+	//frame->AF.jump = -1;
 	
 	while (data < data_end) {
 		unsigned int *buf = data;
@@ -266,6 +266,7 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 		} else if (!memcmp(buf, "AFAL", 4)) {
 			frame->AF.blend_mode = data[0];
 			frame->AF.rgba[3] = ((float)data[1])/255.f;
+			assert(data[0] >= 1 || data[0] <= 3 );
 			data += 2;
 		} else if (!memcmp(buf, "AFRG", 4)) {
 			frame->AF.rgba[0] = ((float)data[0])/255.f;
@@ -292,6 +293,7 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 			data += 2;
 		} else if (!memcmp(buf, "AFJP", 4)) {
 			frame->AF.jump = data[0];
+			assert(data[0] != 0);
 			++data;
 		} else if (!memcmp(buf, "AFHK", 4)) {
 			frame->AF.interpolation = data[0];
@@ -348,6 +350,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			data += 5;
 		} else if (!memcmp(buf, "HRNS", 4) || !memcmp(buf, "HRAS", 4)) {
 			// read hitbox reference
+			// TODO: Load references only after sequence is loaded.
 			unsigned int location = data[0];
 			unsigned int source = data[1];
 			boxesCount++;
@@ -358,7 +361,9 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			
 			if (location <= 32 && source < info->cur_hitbox) {
 				frame->hitboxes[location] = &info->seq->hitboxes[source];
-			} 
+			}
+			else
+				assert(0);
 			
 			data += 2;
 		} else if (!memcmp(buf, "ATST", 4)) {
@@ -425,10 +430,6 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 		}
 		
 		// unhandled:
-		// FSNA(1) ?
-		// FSNH(1) ?
-		// FSNE(1) ?
-		// FSNI(1) ?
 		// (no others)
 		frame->nHitbox=boxesCount;
 	}
@@ -463,14 +464,16 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 				seq->ptcn[4] == 0);
 			data = (unsigned int *)(((unsigned char *)data)+5);
 		} else if (!memcmp(buf, "PSTS", 4)) {
-			//I believe it appears in hantei4 as 技情報. Has to do with the kind of move?
+			//Maybe 技情報. Has to do with the kind of move?
 			//Doesn't appear = 0, Movement
 			//1 Regular attacks
 			//2 Throw. Only Arc (and b_arc) uses it?
 			//3 必殺技? FRies 236C uses it
+			//4 必殺投げ　Some kouma grab
 			//5 他 Projectiles, but not effects.
+			//6 NAC's 96. 超必殺技
 			seq->psts = *data;
-			assert(*data == 1 || *data == 5 || *data == 3 || *data == 2); //known values
+			assert(*data <= 6 && *data >= 0); //known values
 			++data;
 		} else if (!memcmp(buf, "PLVL", 4)) {
 			//Determines rebeat

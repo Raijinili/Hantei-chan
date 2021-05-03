@@ -14,6 +14,7 @@ public:
 	void SetFrameData(FrameData *frameData);
 	void RegenerateNames();
 	void AdvancePattern(int dir);
+	void AdvanceFrame(int dir);
 	
 
 private:
