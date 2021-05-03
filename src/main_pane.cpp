@@ -173,5 +173,5 @@ void MainPane::AdvancePattern(int dir)
 		currentPattern = frameData->get_sequence_count()-1;
 	currFrame = 0;
 
-	ForceUpdate();
+	//ForceUpdate();
 }

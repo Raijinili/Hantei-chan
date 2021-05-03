@@ -14,7 +14,7 @@ public:
 	void SetFrameData(FrameData *frameData);
 	void RegenerateNames();
 	void AdvancePattern(int dir);
-	void ForceUpdate();
+	
 
 private:
 	Render *render;
@@ -25,6 +25,7 @@ private:
 
 	std::string *decoratedNames;
 
+	void ForceUpdate();
 	
 };
 

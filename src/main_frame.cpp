@@ -35,8 +35,14 @@ MainFrame::~MainFrame()
 
 void MainFrame::Draw()
 {
-	DrawBack();
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 	DrawUi();
+	DrawBack();
+	ImGui::Render();
+	
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	SwapBuffers(context->dc);
 }
@@ -53,9 +59,9 @@ void MainFrame::DrawBack()
 void MainFrame::DrawUi()
 {
 	
-	ImGui_ImplOpenGL3_NewFrame();
+	/* ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	ImGui::NewFrame(); */
 	ImGuiID errorPopupId = ImGui::GetID("Loading Error");
 	
 
@@ -187,10 +193,9 @@ void MainFrame::DrawUi()
 	
 
 	// Rendering
-	ImGui::Render();
-	
+/* 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+ */
 }
 
 void MainFrame::WarmStyle()
